@@ -20,3 +20,10 @@ class InvalidTokenException(SanicException):
     def __init__(self):
         message = 'Invalid token exception'
         super().__init__(message)
+
+
+@add_status_code(401)
+class ValidationErrorException(SanicException):
+    def __init__(self):
+        message = 'Validation error exception'
+        super().__init__(message)

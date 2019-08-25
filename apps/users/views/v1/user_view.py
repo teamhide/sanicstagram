@@ -3,6 +3,9 @@ from typing import Union, NoReturn
 from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
+from apps.users.dtos import FollowUserDto
+from apps.users.schemas import FollowUserRequestSchema
+from core.exceptions import ValidationErrorException
 from core.utils import TokenHelper
 
 
@@ -32,6 +35,9 @@ class FollowUser(HTTPMethodView):
     async def get(self, request: Request) -> Union[json, NoReturn]:
         user_id = TokenHelper.extract_from_request(
             request=request).decode().user_id
+        validator = FollowUserRequestSchema().load(data=request.form)
+        if validator.errors:
+            raise ValidationErrorException
 
 
 class UnFollowUser(HTTPMethodView):
