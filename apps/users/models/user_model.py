@@ -1,18 +1,9 @@
-from sqlalchemy import (Column, BigInteger, Unicode, Table, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import (Column, BigInteger, Unicode)
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import ChoiceType
 
 from core.databases import Base
 from core.databases.mixin import TimestampMixin
-
-follows = Table(
-    'follows',
-    Base.metadata,
-    Column('follower_id', BigInteger, ForeignKey('users.id')),
-    Column('following_id', BigInteger, ForeignKey('users.id')),
-    UniqueConstraint('follower_id', 'following_id', name='unique_follows')
-)
 
 
 class User(Base, TimestampMixin):
@@ -30,13 +21,15 @@ class User(Base, TimestampMixin):
     bio = Column(Unicode(length=50), nullable=True)
     phone = Column(Unicode(length=20), nullable=True)
     gender = Column(ChoiceType(GENDER_TYPES))
-    follower = relationship(
-        'User',
-        secondary=follows,
-        primaryjoin=id==follows.c.follower_id,
+    followers = relationship(
+        'Follow',
+        backref='followers',
+        lazy='dynamic',
+        foreign_keys='Follow.following_id',
     )
-    following = relationship(
-        'User',
-        secondary=follows,
-        primaryjoin=id==follows.c.following_id,
+    followings = relationship(
+        'Follow',
+        backref='followings',
+        lazy='dynamic',
+        foreign_keys='Follow.follower_id',
     )

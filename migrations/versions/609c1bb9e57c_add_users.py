@@ -1,8 +1,8 @@
-"""create users table
+"""add users
 
-Revision ID: 530d053a7e19
+Revision ID: 609c1bb9e57c
 Revises: 
-Create Date: 2019-08-25 16:46:53.758248
+Create Date: 2019-08-25 20:53:28.944607
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = '530d053a7e19'
+revision = '609c1bb9e57c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,11 +36,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('follows',
-    sa.Column('follower_id', sa.BigInteger(), nullable=True),
-    sa.Column('following_id', sa.BigInteger(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
+    sa.Column('follower_id', sa.BigInteger(), nullable=False),
+    sa.Column('following_id', sa.BigInteger(), nullable=False),
     sa.ForeignKeyConstraint(['follower_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['following_id'], ['users.id'], ),
-    sa.UniqueConstraint('follower_id', 'following_id', name='unique_follows')
+    sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
 
