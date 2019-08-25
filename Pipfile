@@ -12,6 +12,7 @@ marshmallow = "*"
 pytest-sanic = "*"
 pymysql = "*"
 sqlalchemy-utils = "*"
+alembic = "*"
 
 [requires]
 python_version = "3.7"
