@@ -1,4 +1,5 @@
 from apps.board.views import bp as board_v1
+from apps.users.views import bp as users_v1
 from sanic import Sanic
 
 
@@ -14,6 +15,7 @@ def init_listeners(app: Sanic, config):
 
 def init_blueprints(app: Sanic):
     app.blueprint(board_v1)
+    app.blueprint(users_v1)
 
 
 def init_middlewares(app: Sanic, config):
