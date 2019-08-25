@@ -34,5 +34,9 @@ class User(Base, TimestampMixin):
         'User',
         secondary=follows,
         primaryjoin=id==follows.c.follower_id,
-        secondaryjoin=id==follows.c.following_id,
+    )
+    following = relationship(
+        'User',
+        secondary=follows,
+        primaryjoin=id==follows.c.following_id,
     )
