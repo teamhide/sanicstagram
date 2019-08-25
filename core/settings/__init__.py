@@ -12,24 +12,32 @@ class Config:
         'DB_URL',
         'mysql+pymysql://sanic:sanic@localhost:3306/sanic',
     )
+    jwt_secret_key = 'sanic'
+    jwt_algorithm = 'HS256'
 
 
 @dataclass(frozen=True)
 class DevelopmentConfig(Config):
     env: str = 'development'
     debug: bool = True
+    jwt_secret_key = 'sanic'
+    jwt_algorithm = 'HS256'
 
 
 @dataclass(frozen=True)
 class TestingConfig(Config):
     env: str = 'testing'
     debug: bool = True
+    jwt_secret_key = 'sanic'
+    jwt_algorithm = 'HS256'
 
 
 @dataclass(frozen=True)
 class ProductionConfig(Config):
     env: str = 'production'
     debug: bool = False
+    jwt_secret_key = 'sanic'
+    jwt_algorithm = 'HS256'
 
 
 def get_config():

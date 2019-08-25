@@ -13,6 +13,7 @@ pytest-sanic = "*"
 pymysql = "*"
 sqlalchemy-utils = "*"
 alembic = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.7"
