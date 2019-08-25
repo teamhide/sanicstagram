@@ -3,6 +3,7 @@ from typing import Union, NoReturn
 from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
+from core.utils import TokenHelper
 
 
 class User(HTTPMethodView):
@@ -29,7 +30,8 @@ class FollowUser(HTTPMethodView):
     decorators = []
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
-        pass
+        user_id = TokenHelper.extract_from_request(
+            request=request).decode().user_id
 
 
 class UnFollowUser(HTTPMethodView):
