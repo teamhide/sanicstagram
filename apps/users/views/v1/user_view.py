@@ -23,3 +23,17 @@ class UserList(HTTPMethodView):
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
         pass
+
+
+class FollowUser(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        pass
+
+
+class UnFollowUser(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        pass
