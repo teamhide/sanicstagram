@@ -1,8 +1,11 @@
-import jwt
 from functools import wraps
-from core.settings import get_config
+
+import jwt
+
 from core.exceptions import (TokenHeaderException, TokenDecodeErrorException,
-                             InvalidTokenException)
+                             InvalidTokenException,
+                             UserIdDoesNotExistInHeaderException)
+from core.settings import get_config
 
 
 def is_jwt_authenticated():
@@ -26,5 +29,21 @@ def is_jwt_authenticated():
                 raise TokenDecodeErrorException
             except jwt.exceptions.InvalidTokenError:
                 raise InvalidTokenException
+        return decorated_function
+    return decorator
+
+
+def extract_user_id_from_header():
+    def decorator(f):
+        @wraps(f)
+        async def decorated_function(request, *args, **kwargs):
+            try:
+                user_id = request.headers.get('sanicstagram-user-id')
+                if not user_id:
+                    raise UserIdDoesNotExistInHeaderException
+                request['user_id'] = user_id
+                return await f(request, *args, **kwargs)
+            except (IndexError, AttributeError):
+                raise TokenHeaderException
         return decorated_function
     return decorator
