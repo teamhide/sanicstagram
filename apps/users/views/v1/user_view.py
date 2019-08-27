@@ -7,6 +7,7 @@ from sanic.views import HTTPMethodView
 # from apps.users.dtos import FollowUserDto
 from apps.users.schemas import (FollowUserRequestSchema,
                                 UnFollowUserRequestSchema)
+from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
 
@@ -39,7 +40,7 @@ class UserList(HTTPMethodView):
 
 
 class FollowUser(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(
         self,
@@ -52,7 +53,7 @@ class FollowUser(HTTPMethodView):
 
 
 class UnFollowUser(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(
         self,
