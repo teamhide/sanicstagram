@@ -46,3 +46,24 @@ class UnFollowUser(HTTPMethodView):
         validator = UnFollowUserRequestSchema().load(data=request.form)
         if validator.errors:
             raise ValidationErrorException
+
+
+class ExploreUsers(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        pass
+
+
+class UserFollowers(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        pass
+
+
+class UserFollowings(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        pass
