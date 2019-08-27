@@ -13,10 +13,18 @@ from core.exceptions import ValidationErrorException
 class User(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         pass
 
-    async def post(self, request: Request) -> Union[json, NoReturn]:
+    async def post(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         pass
 
 
@@ -33,7 +41,11 @@ class UserList(HTTPMethodView):
 class FollowUser(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         validator = FollowUserRequestSchema().load(data=request.form)
         if validator.errors:
             raise ValidationErrorException
@@ -42,7 +54,11 @@ class FollowUser(HTTPMethodView):
 class UnFollowUser(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         validator = UnFollowUserRequestSchema().load(data=request.form)
         if validator.errors:
             raise ValidationErrorException
@@ -58,14 +74,22 @@ class ExploreUsers(HTTPMethodView):
 class UserFollowers(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         pass
 
 
 class UserFollowings(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        user_id: int,
+    ) -> Union[json, NoReturn]:
         pass
 
 
