@@ -13,6 +13,14 @@ def init_listeners(app: Sanic, config):
     async def close_db(app, loop):
         pass
 
+    @app.middleware('request')
+    async def print_on_request(request):
+        pass
+
+    @app.middleware('response')
+    async def print_on_response(request, response):
+        pass
+
 
 def init_blueprints(app: Sanic):
     app.blueprint(home)
