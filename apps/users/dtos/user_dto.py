@@ -18,11 +18,11 @@ class UpdateUserDto:
 
 @dataclass
 class FollowUserDto:
-    follower_id: int = None
-    following_id: str = None
+    user_id: int = None
+    follow_user_id: int = None
 
 
 @dataclass
 class UnFollowUserDto:
-    follower_id: int = None
-    following_id: str = None
+    user_id: int = None
+    follow_user_id: int = None

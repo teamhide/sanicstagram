@@ -1,12 +1,14 @@
 from typing import Union, NoReturn
 
+from marshmallow.exceptions import ValidationError
 from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
 
-# from apps.users.dtos import FollowUserDto
+from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
 from apps.users.schemas import (FollowUserRequestSchema,
                                 UnFollowUserRequestSchema)
+from apps.users.usecases import FollowUserUsecase, UnFollowUserUsecase
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -42,27 +44,45 @@ class UserList(HTTPMethodView):
 class FollowUser(HTTPMethodView):
     decorators = [extract_user_id_from_token()]
 
-    async def get(
+    async def post(
         self,
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        validator = FollowUserRequestSchema().load(data=request.form)
-        if validator.errors:
+        try:
+            validator = FollowUserRequestSchema().load(
+                data={
+                    'user_id': request['user_id'],
+                    'follow_user_id': user_id,
+                },
+            )
+        except ValidationError:
             raise ValidationErrorException
+
+        FollowUserUsecase().execute(dto=FollowUserDto(**validator))
+        return json(body={'result': True})
 
 
 class UnFollowUser(HTTPMethodView):
     decorators = [extract_user_id_from_token()]
 
-    async def get(
+    async def post(
         self,
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        validator = UnFollowUserRequestSchema().load(data=request.form)
-        if validator.errors:
+        try:
+            validator = UnFollowUserRequestSchema().load(
+                data={
+                    'user_id': request['user_id'],
+                    'follow_user_id': user_id,
+                },
+            )
+        except ValidationError:
             raise ValidationErrorException
+
+        UnFollowUserUsecase().execute(dto=UnFollowUserDto(**validator))
+        return json(body={'result': True})
 
 
 class ExploreUsers(HTTPMethodView):

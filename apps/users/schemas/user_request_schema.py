@@ -14,8 +14,10 @@ class UpdateUserRequestSchema(Schema):
 
 
 class FollowUserRequestSchema(Schema):
-    follower_id = fields.Int()
+    user_id = fields.Int(required=True)
+    follow_user_id = fields.Int(required=True)
 
 
 class UnFollowUserRequestSchema(Schema):
-    follower_id = fields.Int()
+    user_id = fields.Int(required=True)
+    follow_user_id = fields.Int(required=True)

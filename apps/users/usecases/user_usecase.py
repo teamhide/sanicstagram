@@ -1,3 +1,4 @@
+from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
 from apps.users.repositories.mysql import UserMySQLRepository
 
 
@@ -22,12 +23,12 @@ class UpdateUserUsecase(UserUsecase):
 
 
 class FollowUserUsecase(UserUsecase):
-    def execute(self, dto):
+    def execute(self, dto: FollowUserDto):
         pass
 
 
 class UnFollowUserUsecase(UserUsecase):
-    def execute(self, dto):
+    def execute(self, dto: UnFollowUserDto):
         pass
 
 
