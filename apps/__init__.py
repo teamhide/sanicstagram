@@ -1,5 +1,6 @@
 from apps.board.views import bp as board_v1
 from apps.users.views import bp as users_v1
+from apps.home.views import bp as home
 from sanic import Sanic
 
 
@@ -14,6 +15,7 @@ def init_listeners(app: Sanic, config):
 
 
 def init_blueprints(app: Sanic):
+    app.blueprint(home)
     app.blueprint(board_v1)
     app.blueprint(users_v1)
 
