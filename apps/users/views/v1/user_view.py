@@ -67,3 +67,10 @@ class UserFollowings(HTTPMethodView):
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
         pass
+
+
+class Login(HTTPMethodView):
+    decorators = []
+
+    async def post(self, request: Request) -> Union[json, NoReturn]:
+        pass

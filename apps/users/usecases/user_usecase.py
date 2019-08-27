@@ -7,20 +7,36 @@ class UserUsecase:
 
 
 class RegisterUserUsecase(UserUsecase):
-    pass
+    def execute(self, dto):
+        pass
 
 
 class GetUserListUsecase(UserUsecase):
-    pass
+    def execute(self, dto):
+        pass
 
 
 class UpdateUserUsecase(UserUsecase):
-    pass
+    def execute(self, dto):
+        pass
 
 
 class FollowUserUsecase(UserUsecase):
-    pass
+    def execute(self, dto):
+        pass
 
 
 class UnFollowUserUsecase(UserUsecase):
-    pass
+    def execute(self, dto):
+        pass
+
+
+class LoginUsecase(UserUsecase):
+    def execute(self, dto):
+        pass
+
+    def _default_login(self):
+        pass
+
+    def _social_login(self):
+        pass
