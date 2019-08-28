@@ -15,11 +15,6 @@ revision = '609c1bb9e57c'
 down_revision = None
 branch_labels = None
 depends_on = None
-GENDER_TYPES = [
-    (u'm', u'M'),
-    (u'f', u'F'),
-    (u'u', u'Unknown'),
-]
 
 
 def upgrade():
@@ -29,10 +24,11 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('name', sa.Unicode(length=255), nullable=True),
+    sa.Column('profile_image', sa.Unicode(length=255), nullable=True),
     sa.Column('website', sa.Unicode(length=50), nullable=True),
     sa.Column('bio', sa.Unicode(length=50), nullable=True),
     sa.Column('phone', sa.Unicode(length=20), nullable=True),
-    sa.Column('gender', sqlalchemy_utils.types.choice.ChoiceType(GENDER_TYPES), nullable=True),
+    sa.Column('gender', sa.Unicode(length=3), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('follows',

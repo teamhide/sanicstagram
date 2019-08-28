@@ -8,7 +8,8 @@ from sanic.views import HTTPMethodView
 from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
 from apps.users.schemas import (FollowUserRequestSchema,
                                 UnFollowUserRequestSchema)
-from apps.users.usecases import FollowUserUsecase, UnFollowUserUsecase
+from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
+                                 ExploreUsersUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -89,7 +90,9 @@ class ExploreUsers(HTTPMethodView):
     decorators = []
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
-        pass
+        users = ExploreUsersUsecase().execute()
+        print(users)
+        return json(body={'result': True})
 
 
 class UserFollowers(HTTPMethodView):

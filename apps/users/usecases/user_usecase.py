@@ -1,7 +1,11 @@
-from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
-from core.databases import session
-from apps.users.models import User, Follow
+from typing import List, Optional
+
 import sqlalchemy.exc
+
+from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
+from apps.users.entities import UserEntity
+from apps.users.models import Follow, User
+from core.databases import session
 
 
 class UserUsecase:
@@ -70,6 +74,23 @@ class UnFollowUserUsecase(UserUsecase):
         except sqlalchemy.exc.IntegrityError as e:
             print(e)
             session.rollback()
+
+
+class ExploreUsersUsecase(UserUsecase):
+    def execute(self) -> Optional[List[UserEntity]]:
+        users = session.query(User).order_by(User.id.desc()).all()[:5]
+        if not users:
+            return
+
+        user_entities = [
+            UserEntity(
+                id=user.id,
+                profile_image=user.profile_image,
+                name=user.name,
+            )
+            for user in users
+        ]
+        return user_entities
 
 
 class LoginUsecase(UserUsecase):
