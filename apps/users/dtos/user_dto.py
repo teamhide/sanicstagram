@@ -2,6 +2,11 @@ from dataclasses import dataclass
 
 
 @dataclass
+class GetUserDto:
+    name: str = None
+
+
+@dataclass
 class RegisterUserDto:
     pass
 

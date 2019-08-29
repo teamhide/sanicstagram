@@ -34,3 +34,10 @@ class UserIdDoesNotExistInHeaderException(SanicException):
     def __init__(self):
         message = 'User id does not exist in header exception'
         super().__init__(message)
+
+
+@add_status_code(404)
+class NotFoundErrorException(SanicException):
+    def __init__(self):
+        message = 'Not found error exception'
+        super().__init__(message)

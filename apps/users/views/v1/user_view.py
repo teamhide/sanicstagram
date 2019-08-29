@@ -5,12 +5,13 @@ from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
 
-from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
+from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
+from apps.users.presenters import ExploreUsersPresenter, GetUserPresenter
 from apps.users.schemas import (FollowUserRequestSchema,
-                                UnFollowUserRequestSchema)
+                                UnFollowUserRequestSchema,
+                                GetUserRequestSchema)
 from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
-                                 ExploreUsersUsecase)
-from apps.users.presenters import ExploreUsersPresenter
+                                 ExploreUsersUsecase, GetUserUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -123,3 +124,17 @@ class Login(HTTPMethodView):
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
         pass
+
+
+class UserProfile(HTTPMethodView):
+    decorators = []
+
+    async def get(self, request: Request, name: str) -> Union[json, NoReturn]:
+        try:
+            validator = GetUserRequestSchema().load(data={'name': name})
+        except ValidationError:
+            raise ValidationErrorException
+
+        user = GetUserUsecase().execute(dto=GetUserDto(**validator))
+        response = GetUserPresenter.process(data=user)
+        return json(body=response)

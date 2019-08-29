@@ -2,10 +2,11 @@ from typing import List, Optional
 
 import sqlalchemy.exc
 
-from apps.users.dtos import (FollowUserDto, UnFollowUserDto)
+from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
 from apps.users.entities import UserEntity
 from apps.users.models import Follow, User
 from core.databases import session
+from core.exceptions import NotFoundErrorException
 
 
 class UserUsecase:
@@ -19,6 +20,22 @@ class UserUsecase:
             Follow.following_id == follow_user_id,
         ).first()
         return is_exist is not None
+
+
+class GetUserUsecase(UserUsecase):
+    def execute(self, dto: GetUserDto):
+        user = session.query(User).filter(User.name == dto.name).first()
+        if not user:
+            raise NotFoundErrorException
+
+        return UserEntity(
+            name=user.name,
+            profile_image=user.profile_image,
+            bio=user.bio,
+            website=user.website,
+            followers=user.followers,
+            followings=user.followings,
+        )
 
 
 class RegisterUserUsecase(UserUsecase):

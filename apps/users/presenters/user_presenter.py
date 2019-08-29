@@ -2,7 +2,8 @@ import abc
 from typing import Any, List
 
 from apps.users.entities import UserEntity
-from apps.users.schemas import ExploreUsersResponseSchema
+from apps.users.schemas import (ExploreUsersResponseSchema,
+                                GetUserResponseSchema)
 
 
 class Presenter:
@@ -47,3 +48,10 @@ class ExploreUsersPresenter(Presenter):
     @classmethod
     def process(cls, data: List[UserEntity]):
         return {'data': ExploreUsersResponseSchema().dump(data, many=True)}
+
+
+class GetUserPresenter(Presenter):
+    @classmethod
+    def process(cls, data: UserEntity):
+        # TODO: calculate follower/following count and apply it to response
+        return {'data': GetUserResponseSchema().dump(data)}
