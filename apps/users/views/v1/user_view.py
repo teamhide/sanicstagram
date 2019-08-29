@@ -10,6 +10,7 @@ from apps.users.schemas import (FollowUserRequestSchema,
                                 UnFollowUserRequestSchema)
 from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
                                  ExploreUsersUsecase)
+from apps.users.presenters import ExploreUsersPresenter
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -91,8 +92,8 @@ class ExploreUsers(HTTPMethodView):
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
         users = ExploreUsersUsecase().execute()
-        print(users)
-        return json(body={'result': True})
+        response = ExploreUsersPresenter.process(data=users)
+        return json(body=response)
 
 
 class UserFollowers(HTTPMethodView):
