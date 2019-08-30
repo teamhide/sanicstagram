@@ -21,12 +21,13 @@ class UserUsecase:
 
 class GetUserUsecase(UserUsecase):
     def execute(self, dto: GetUserDto):
-        user = session.query(User).filter(User.name == dto.name).first()
+        user = session.query(User)\
+            .filter(User.nickname == dto.nickname).first()
         if not user:
             raise NotFoundErrorException
 
         return UserEntity(
-            name=user.name,
+            nickname=user.nickname,
             profile_image=user.profile_image,
             bio=user.bio,
             website=user.website,
@@ -100,7 +101,7 @@ class ExploreUsersUsecase(UserUsecase):
             UserEntity(
                 id=user.id,
                 profile_image=user.profile_image,
-                name=user.name,
+                nickname=user.nickname,
             )
             for user in users
         ]

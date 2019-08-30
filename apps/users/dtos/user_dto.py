@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class GetUserDto:
-    name: str = None
+    nickname: str = None
 
 
 @dataclass

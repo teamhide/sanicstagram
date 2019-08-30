@@ -5,7 +5,7 @@ from typing import List
 @dataclass
 class UserEntity:
     id: int = None
-    name: str = None
+    nickname: str = None
     profile_image: str = None
     website: str = None
     bio: str = None

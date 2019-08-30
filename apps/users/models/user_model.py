@@ -16,8 +16,8 @@ class User(Base, TimestampMixin):
     __tablename__ = 'users'
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
-    email = Column(Unicode(length=255), nullable=False)
-    name = Column(Unicode(length=255), nullable=True)
+    email = Column(Unicode(length=255), nullable=False, unique=True)
+    nickname = Column(Unicode(length=255), nullable=True, unique=True)
     profile_image = Column(Unicode(length=255), nullable=True)
     website = Column(Unicode(length=50), nullable=True)
     bio = Column(Unicode(length=50), nullable=True)

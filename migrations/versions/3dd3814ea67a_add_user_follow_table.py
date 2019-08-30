@@ -23,11 +23,11 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('email', sa.Unicode(length=255), nullable=False),
-    sa.Column('name', sa.Unicode(length=255), nullable=True),
+    sa.Column('nickname', sa.Unicode(length=255), nullable=True, unique=True),
     sa.Column('profile_image', sa.Unicode(length=255), nullable=True),
     sa.Column('website', sa.Unicode(length=50), nullable=True),
     sa.Column('bio', sa.Unicode(length=50), nullable=True),
-    sa.Column('phone', sa.Unicode(length=20), nullable=True),
+    sa.Column('phone', sa.Unicode(length=20), nullable=True, unique=True),
     sa.Column('gender', sa.Unicode(length=3), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
