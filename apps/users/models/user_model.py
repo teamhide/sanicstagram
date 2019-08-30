@@ -26,15 +26,15 @@ class User(Base, TimestampMixin):
     followers = relationship(
         'User',
         secondary=follows,
-        primaryjoin=(follows.c.follower_id == id),
-        secondaryjoin=(follows.c.following_id == id),
+        primaryjoin=(follows.c.following_id == id),
+        secondaryjoin=(follows.c.follower_id == id),
         lazy='dynamic',
     )
     followings = relationship(
         'User',
         secondary=follows,
-        primaryjoin=(follows.c.following_id == id),
-        secondaryjoin=(follows.c.follower_id == id),
+        primaryjoin=(follows.c.follower_id == id),
+        secondaryjoin=(follows.c.following_id == id),
         lazy='dynamic',
     )
 

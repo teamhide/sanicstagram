@@ -4,7 +4,7 @@ import sqlalchemy.exc
 
 from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
 from apps.users.entities import UserEntity
-from apps.users.models import Follow, User
+from apps.users.models import User
 from core.databases import session
 from core.exceptions import NotFoundErrorException
 
@@ -13,13 +13,10 @@ class UserUsecase:
     def __init__(self):
         pass
 
-    def _is_followed(self, user_id: int, follow_user_id: int) -> bool:
-        is_exist = session.query(Follow)\
-            .filter(
-            Follow.follower_id == user_id,
-            Follow.following_id == follow_user_id,
-        ).first()
-        return is_exist is not None
+    def _is_followed(self, user_id: int, target_user_id: int) -> bool:
+        user = session.query(User).filter(User.id == user_id).first() \
+            .followings.filter(User.id == target_user_id).first()
+        return user is None
 
 
 class GetUserUsecase(UserUsecase):
@@ -55,42 +52,43 @@ class UpdateUserUsecase(UserUsecase):
 
 class FollowUserUsecase(UserUsecase):
     def execute(self, dto: FollowUserDto) -> None:
+        user = session.query(User).filter(User.id == dto.user_id).first()
         if self._is_followed(
                 user_id=dto.user_id,
-                follow_user_id=dto.follow_user_id,
+                target_user_id=dto.follow_user_id,
         ):
             return
-
-        try:
-            relationship = Follow(
-                follower_id=dto.user_id,
-                following_id=dto.follow_user_id,
-            )
-            session.add(relationship)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
+        #
+        # try:
+        #     relationship = Follow(
+        #         follower_id=dto.user_id,
+        #         following_id=dto.follow_user_id,
+        #     )
+        #     session.add(relationship)
+        #     session.commit()
+        # except sqlalchemy.exc.IntegrityError as e:
+        #     print(e)
+        #     session.rollback()
 
 
 class UnFollowUserUsecase(UserUsecase):
     def execute(self, dto: UnFollowUserDto) -> None:
         if not self._is_followed(
                 user_id=dto.user_id,
-                follow_user_id=dto.follow_user_id,
+                target_user_id=dto.follow_user_id,
         ):
             return
-
-        try:
-            relationship = Follow(
-                follower_id=dto.user_id,
-                following_id=dto.follow_user_id,
-            )
-            session.delete(relationship)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
+        #
+        # try:
+        #     relationship = Follow(
+        #         follower_id=dto.user_id,
+        #         following_id=dto.follow_user_id,
+        #     )
+        #     session.delete(relationship)
+        #     session.commit()
+        # except sqlalchemy.exc.IntegrityError as e:
+        #     print(e)
+        #     session.rollback()
 
 
 class ExploreUsersUsecase(UserUsecase):
