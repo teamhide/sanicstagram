@@ -13,3 +13,5 @@ class UserEntity:
     gender: str = None
     followers: List = None
     followings: List = None
+    follower_count: int = None
+    following_count: int = None

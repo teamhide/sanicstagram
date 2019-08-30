@@ -1,8 +1,15 @@
-from sqlalchemy import (Column, BigInteger, Unicode)
-from sqlalchemy.orm import relationship
+from sqlalchemy import (Column, BigInteger, Unicode, ForeignKey, Table)
+from sqlalchemy.orm import relationship, backref
 
 from core.databases import Base
 from core.databases.mixin import TimestampMixin
+
+follows = Table(
+    'follows',
+    Base.metadata,
+    Column('follower_id', ForeignKey('users.id')),
+    Column('following_id', ForeignKey('users.id')),
+)
 
 
 class User(Base, TimestampMixin):
@@ -17,14 +24,22 @@ class User(Base, TimestampMixin):
     phone = Column(Unicode(length=20), nullable=True)
     gender = Column(Unicode(length=3), nullable=True)
     followers = relationship(
-        'Follow',
-        backref='followers',
+        'User',
+        secondary=follows,
+        primaryjoin=(follows.c.follower_id == id),
+        secondaryjoin=(follows.c.following_id == id),
         lazy='dynamic',
-        foreign_keys='Follow.following_id',
     )
     followings = relationship(
-        'Follow',
-        backref='followings',
+        'User',
+        secondary=follows,
+        primaryjoin=(follows.c.following_id == id),
+        secondaryjoin=(follows.c.follower_id == id),
         lazy='dynamic',
-        foreign_keys='Follow.follower_id',
     )
+
+    def follower_count(self) -> int:
+        return self.followers.count()
+
+    def following_count(self) -> int:
+        return self.followings.count()
