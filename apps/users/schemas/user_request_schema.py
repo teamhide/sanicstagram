@@ -2,7 +2,7 @@ from marshmallow import Schema, fields
 
 
 class GetUserRequestSchema(Schema):
-    name = fields.Str(required=True)
+    nickname = fields.Str(required=True)
 
 
 class RegisterUserRequestSchema(Schema):
@@ -15,3 +15,7 @@ class GetUserListRequestSchema(Schema):
 
 class UpdateUserRequestSchema(Schema):
     pass
+
+
+class SearchUserRequestSchema(Schema):
+    nickname = fields.Str(required=True)

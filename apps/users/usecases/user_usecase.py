@@ -20,7 +20,7 @@ class UserUsecase:
 
 
 class GetUserUsecase(UserUsecase):
-    def execute(self, dto: GetUserDto):
+    def execute(self, dto: GetUserDto) -> UserEntity:
         user = session.query(User)\
             .filter(User.nickname == dto.nickname).first()
         if not user:
@@ -119,8 +119,8 @@ class LoginUsecase(UserUsecase):
         pass
 
 
-class GetUserFollowers(UserUsecase):
-    def execute(self, user_id: int):
+class GetUserFollowersUsecase(UserUsecase):
+    def execute(self, user_id: int) -> List[UserEntity]:
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
             raise NotFoundErrorException
@@ -138,8 +138,8 @@ class GetUserFollowers(UserUsecase):
         ]
 
 
-class GetUserFollowings(UserUsecase):
-    def execute(self, user_id: int):
+class GetUserFollowingsUsecase(UserUsecase):
+    def execute(self, user_id: int) -> List[UserEntity]:
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
             raise NotFoundErrorException
@@ -154,4 +154,21 @@ class GetUserFollowings(UserUsecase):
                 gender=followings.gender,
             )
             for followings in user.followings
+        ]
+
+
+class SearchUserUsecase(UserUsecase):
+    def execute(self, nickname: str) -> List[UserEntity]:
+        users = session.query(User).filter(User.nickname.like(nickname)).all()
+        return [
+            UserEntity(
+                id=user.id,
+                nickname=user.nickname,
+                profile_image=user.profile_image,
+                website=user.website,
+                bio=user.bio,
+                phone=user.phone,
+                gender=user.gender,
+            )
+            for user in users
         ]

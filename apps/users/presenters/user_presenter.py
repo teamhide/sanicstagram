@@ -67,3 +67,9 @@ class UserFollowingsPresenter(Presenter):
     @classmethod
     def process(cls, data: List[UserEntity]) -> dict:
         return {'data': ExploreUsersResponseSchema().dump(data, many=True)}
+
+
+class SearchUserPresenter(Presenter):
+    @classmethod
+    def process(cls, data: List[UserEntity]) -> dict:
+        return {'data': ExploreUsersResponseSchema().dump(data, many=True)}

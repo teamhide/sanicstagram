@@ -2,7 +2,7 @@ from sanic import Blueprint
 
 from apps.users.views.v1 import (User, UserList, FollowUser, UnFollowUser,
                                  ExploreUsers, UserFollowers, UserFollowings,
-                                 Login, UserProfile)
+                                 Login, UserProfile, SearchUser)
 
 bp = Blueprint('users', url_prefix='/api/v1')
 bp.add_route(User.as_view(), '/users/<user_id:int>')
@@ -14,3 +14,4 @@ bp.add_route(ExploreUsers.as_view(), '/explore')
 bp.add_route(UserFollowers.as_view(), '/<user_id:int>/followers')
 bp.add_route(UserFollowings.as_view(), '/<user_id:int>/followings')
 bp.add_route(Login.as_view(), '/login')
+bp.add_route(SearchUser.as_view(), '/search/<nickname:string>')

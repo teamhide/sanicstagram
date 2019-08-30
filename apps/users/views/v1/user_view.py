@@ -7,11 +7,14 @@ from sanic.views import HTTPMethodView
 
 from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
 from apps.users.presenters import (ExploreUsersPresenter, GetUserPresenter,
-                                   UserFollowersPresenter, FollowUserPresenter, UnFollowUserPresenter, UserFollowingsPresenter)
-from apps.users.schemas import GetUserRequestSchema
+                                   UserFollowersPresenter, FollowUserPresenter,
+                                   UnFollowUserPresenter,
+                                   UserFollowingsPresenter, SearchUserPresenter)
+from apps.users.schemas import GetUserRequestSchema, SearchUserRequestSchema
 from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
                                  ExploreUsersUsecase, GetUserUsecase,
-                                 GetUserFollowers, GetUserFollowings)
+                                 GetUserFollowersUsecase,
+                                 GetUserFollowingsUsecase, SearchUserUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -97,7 +100,7 @@ class UserFollowers(HTTPMethodView):
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        followers = GetUserFollowers().execute(user_id=user_id)
+        followers = GetUserFollowersUsecase().execute(user_id=user_id)
         response = UserFollowersPresenter.process(data=followers)
         return json(body=response)
 
@@ -110,7 +113,7 @@ class UserFollowings(HTTPMethodView):
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        followings = GetUserFollowings().execute(user_id=user_id)
+        followings = GetUserFollowingsUsecase().execute(user_id=user_id)
         response = UserFollowingsPresenter.process(data=followings)
         return json(body=response)
 
@@ -125,12 +128,36 @@ class Login(HTTPMethodView):
 class UserProfile(HTTPMethodView):
     decorators = []
 
-    async def get(self, request: Request, name: str) -> Union[json, NoReturn]:
+    async def get(
+        self,
+        request: Request,
+        nickname: str,
+    ) -> Union[json, NoReturn]:
         try:
-            validator = GetUserRequestSchema().load(data={'name': name})
+            validator = GetUserRequestSchema().load(
+                data={'nickname': nickname},
+            )
         except ValidationError:
             raise ValidationErrorException
 
         user = GetUserUsecase().execute(dto=GetUserDto(**validator))
         response = GetUserPresenter.process(data=user)
+        return json(body=response)
+
+
+class SearchUser(HTTPMethodView):
+    decorators = []
+
+    async def get(
+        self,
+        request: Request,
+        nickname: str,
+    ) -> Union[json, NoReturn]:
+        try:
+            SearchUserRequestSchema().load(data={'nickname': nickname})
+        except ValidationError:
+            raise ValidationErrorException
+
+        users = SearchUserUsecase().execute(nickname=nickname)
+        response = SearchUserPresenter.process(data=users)
         return json(body=response)
