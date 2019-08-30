@@ -2,6 +2,7 @@ from apps.board.views import bp as board_v1
 from apps.users.views import bp as users_v1
 from apps.home.views import bp as home
 from sanic import Sanic
+from core.databases import session
 
 
 def init_listeners(app: Sanic, config):
@@ -18,8 +19,8 @@ def init_listeners(app: Sanic, config):
         pass
 
     @app.middleware('response')
-    async def print_on_response(request, response):
-        pass
+    async def close_session(request, response):
+        session.close()
 
 
 def init_blueprints(app: Sanic):
