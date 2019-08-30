@@ -6,12 +6,12 @@ from sanic.response import json
 from sanic.views import HTTPMethodView
 
 from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
-from apps.users.presenters import ExploreUsersPresenter, GetUserPresenter
-from apps.users.schemas import (FollowUserRequestSchema,
-                                UnFollowUserRequestSchema,
-                                GetUserRequestSchema)
+from apps.users.presenters import (ExploreUsersPresenter, GetUserPresenter,
+                                   UserFollowersPresenter, FollowUserPresenter, UnFollowUserPresenter, UserFollowingsPresenter)
+from apps.users.schemas import GetUserRequestSchema
 from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
-                                 ExploreUsersUsecase, GetUserUsecase)
+                                 ExploreUsersUsecase, GetUserUsecase,
+                                 GetUserFollowers, GetUserFollowings)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -52,18 +52,14 @@ class FollowUser(HTTPMethodView):
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        try:
-            validator = FollowUserRequestSchema().load(
-                data={
-                    'user_id': request['user_id'],
-                    'follow_user_id': user_id,
-                },
+        FollowUserUsecase().execute(
+            dto=FollowUserDto(
+                user_id=request['user_id'],
+                follow_user_id=user_id,
             )
-        except ValidationError:
-            raise ValidationErrorException
-
-        FollowUserUsecase().execute(dto=FollowUserDto(**validator))
-        return json(body={'result': True})
+        )
+        response = FollowUserPresenter.process()
+        return json(body=response)
 
 
 class UnFollowUser(HTTPMethodView):
@@ -74,22 +70,18 @@ class UnFollowUser(HTTPMethodView):
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        try:
-            validator = UnFollowUserRequestSchema().load(
-                data={
-                    'user_id': request['user_id'],
-                    'follow_user_id': user_id,
-                },
+        UnFollowUserUsecase().execute(
+            dto=UnFollowUserDto(
+                user_id=request['user_id'],
+                follow_user_id=user_id,
             )
-        except ValidationError:
-            raise ValidationErrorException
-
-        UnFollowUserUsecase().execute(dto=UnFollowUserDto(**validator))
-        return json(body={'result': True})
+        )
+        response = UnFollowUserPresenter.process()
+        return json(body=response)
 
 
 class ExploreUsers(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
         users = ExploreUsersUsecase().execute()
@@ -98,25 +90,29 @@ class ExploreUsers(HTTPMethodView):
 
 
 class UserFollowers(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(
         self,
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        followers = GetUserFollowers().execute(user_id=user_id)
+        response = UserFollowersPresenter.process(data=followers)
+        return json(body=response)
 
 
 class UserFollowings(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(
         self,
         request: Request,
         user_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        followings = GetUserFollowings().execute(user_id=user_id)
+        response = UserFollowingsPresenter.process(data=followings)
+        return json(body=response)
 
 
 class Login(HTTPMethodView):

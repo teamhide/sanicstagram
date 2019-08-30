@@ -16,7 +16,7 @@ class UserUsecase:
     def _is_followed(self, user_id: int, target_user_id: int) -> bool:
         user = session.query(User).filter(User.id == user_id).first() \
             .followings.filter(User.id == target_user_id).first()
-        return user is None
+        return user is not None
 
 
 class GetUserUsecase(UserUsecase):
@@ -83,7 +83,7 @@ class UnFollowUserUsecase(UserUsecase):
         try:
             target_user = session.query(User)\
                 .filter(User.id == dto.follow_user_id).first()
-            user.followers.append(target_user)
+            user.followings.remove(target_user)
             session.add(user)
             session.commit()
         except sqlalchemy.exc.IntegrityError as e:
@@ -117,3 +117,41 @@ class LoginUsecase(UserUsecase):
 
     def _social_login(self):
         pass
+
+
+class GetUserFollowers(UserUsecase):
+    def execute(self, user_id: int):
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise NotFoundErrorException
+        return [
+            UserEntity(
+                id=follower.id,
+                nickname=follower.nickname,
+                profile_image=follower.profile_image,
+                website=follower.website,
+                bio=follower.bio,
+                phone=follower.phone,
+                gender=follower.gender,
+            )
+            for follower in user.followers
+        ]
+
+
+class GetUserFollowings(UserUsecase):
+    def execute(self, user_id: int):
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise NotFoundErrorException
+        return [
+            UserEntity(
+                id=followings.id,
+                nickname=followings.nickname,
+                profile_image=followings.profile_image,
+                website=followings.website,
+                bio=followings.bio,
+                phone=followings.phone,
+                gender=followings.gender,
+            )
+            for followings in user.followings
+        ]

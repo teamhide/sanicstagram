@@ -15,13 +15,3 @@ class GetUserListRequestSchema(Schema):
 
 class UpdateUserRequestSchema(Schema):
     pass
-
-
-class FollowUserRequestSchema(Schema):
-    user_id = fields.Int(required=True)
-    follow_user_id = fields.Int(required=True)
-
-
-class UnFollowUserRequestSchema(Schema):
-    user_id = fields.Int(required=True)
-    follow_user_id = fields.Int(required=True)
