@@ -52,23 +52,22 @@ class UpdateUserUsecase(UserUsecase):
 
 class FollowUserUsecase(UserUsecase):
     def execute(self, dto: FollowUserDto) -> None:
-        user = session.query(User).filter(User.id == dto.user_id).first()
         if self._is_followed(
                 user_id=dto.user_id,
                 target_user_id=dto.follow_user_id,
         ):
             return
-        #
-        # try:
-        #     relationship = Follow(
-        #         follower_id=dto.user_id,
-        #         following_id=dto.follow_user_id,
-        #     )
-        #     session.add(relationship)
-        #     session.commit()
-        # except sqlalchemy.exc.IntegrityError as e:
-        #     print(e)
-        #     session.rollback()
+
+        user = session.query(User).filter(User.id == dto.user_id).first()
+        try:
+            target_user = session.query(User)\
+                .filter(User.id == dto.follow_user_id).first()
+            user.followings.append(target_user)
+            session.add(user)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
 
 
 class UnFollowUserUsecase(UserUsecase):
@@ -78,17 +77,17 @@ class UnFollowUserUsecase(UserUsecase):
                 target_user_id=dto.follow_user_id,
         ):
             return
-        #
-        # try:
-        #     relationship = Follow(
-        #         follower_id=dto.user_id,
-        #         following_id=dto.follow_user_id,
-        #     )
-        #     session.delete(relationship)
-        #     session.commit()
-        # except sqlalchemy.exc.IntegrityError as e:
-        #     print(e)
-        #     session.rollback()
+
+        user = session.query(User).filter(User.id == dto.user_id).first()
+        try:
+            target_user = session.query(User)\
+                .filter(User.id == dto.follow_user_id).first()
+            user.followers.append(target_user)
+            session.add(user)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
 
 
 class ExploreUsersUsecase(UserUsecase):
