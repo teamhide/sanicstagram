@@ -38,8 +38,10 @@ class User(Base, TimestampMixin):
         lazy='dynamic',
     )
 
+    @property
     def follower_count(self) -> int:
         return self.followers.count()
 
+    @property
     def following_count(self) -> int:
         return self.followings.count()

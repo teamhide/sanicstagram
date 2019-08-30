@@ -159,7 +159,8 @@ class GetUserFollowingsUsecase(UserUsecase):
 
 class SearchUserUsecase(UserUsecase):
     def execute(self, nickname: str) -> List[UserEntity]:
-        users = session.query(User).filter(User.nickname.like(nickname)).all()
+        users = session.query(User)\
+            .filter(User.nickname.like(nickname)).all()
         return [
             UserEntity(
                 id=user.id,
