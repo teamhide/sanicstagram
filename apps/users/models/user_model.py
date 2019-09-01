@@ -1,5 +1,6 @@
 from sqlalchemy import (Column, BigInteger, Unicode, ForeignKey, Table)
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 from core.databases import Base
 from core.databases.mixin import TimestampMixin
@@ -38,10 +39,10 @@ class User(Base, TimestampMixin):
         lazy='dynamic',
     )
 
-    @property
+    @hybrid_property
     def follower_count(self) -> int:
         return self.followers.count()
 
-    @property
+    @hybrid_property
     def following_count(self) -> int:
         return self.followings.count()
