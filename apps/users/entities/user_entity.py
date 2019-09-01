@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
 
@@ -15,3 +16,5 @@ class UserEntity:
     followings: List = None
     follower_count: int = None
     following_count: int = None
+    created_at: datetime = None
+    updated_at: datetime = None
