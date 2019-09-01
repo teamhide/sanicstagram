@@ -5,12 +5,12 @@ from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
 
-from apps.posts.dtos import CreatePostDto
-from apps.posts.presenters import CreatePostPresenter
-from apps.posts.schemas import CreatePostSchema
-from apps.posts.usecases import CreatePostUsecase
-from core.exceptions import ValidationErrorException
+from apps.posts.dtos import (CreatePostDto, FeedViewPostDto)
+from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter)
+from apps.posts.schemas import (CreatePostSchema, FeedViewPostSchema)
+from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase)
 from core.decorators import extract_user_id_from_token
+from core.exceptions import ValidationErrorException
 
 
 class Post(HTTPMethodView):
@@ -42,7 +42,19 @@ class PostList(HTTPMethodView):
     decorators = [extract_user_id_from_token()]
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
-        pass
+        try:
+            validator = FeedViewPostSchema().load(data=request.args)
+        except ValidationError:
+            raise ValidationErrorException
+
+        posts = FeedViewPostUsecase().execute(
+            dto=FeedViewPostDto(
+                **validator,
+                user_id=request['user_id'],
+            )
+        )
+        response = FeedViewPostPresenter.process(data=posts)
+        return json(body=response)
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
         try:

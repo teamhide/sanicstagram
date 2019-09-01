@@ -24,3 +24,14 @@ class CreatePostResponseSchema(Schema):
     creator = fields.Int()
     comments = fields.List(fields.Nested(CommentSchema))
     tags = fields.List(fields.Nested(TagSchema))
+
+
+class FeedViewPostResponseSchema(Schema):
+    id = fields.Int()
+    attachments = fields.List(fields.Nested(AttachmentSchema))
+    caption = fields.Str()
+    creator = fields.Int()
+    comments = fields.List(fields.Nested(CommentSchema))
+    tags = fields.List(fields.Nested(TagSchema))
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()

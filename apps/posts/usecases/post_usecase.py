@@ -1,10 +1,13 @@
-from apps.posts.entities import PostEntity, CommentEntity
-import sqlalchemy.exc
-from apps.posts.dtos import CreatePostDto
+from typing import List
 from uuid import uuid4
-from core.exceptions import UploadErrorException
+
+import sqlalchemy.exc
+
+from apps.posts.dtos import CreatePostDto, FeedViewPostDto
+from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.models import Post, Attachment
 from core.databases import session
+from core.exceptions import UploadErrorException
 
 
 class PostUsecase:
@@ -17,9 +20,34 @@ class GetPostUsecase(PostUsecase):
         pass
 
 
-class GetPostListUsecase(PostUsecase):
-    def execute(self, dto) -> PostEntity:
-        pass
+class FeedViewPostUsecase(PostUsecase):
+    def execute(self, dto: FeedViewPostDto) -> List[PostEntity]:
+        query = session.query(Post).filter(Post.creator != dto.user_id)\
+            .order_by(Post.id.desc())
+        if dto.prev:
+            query = query.filter(Post.id < dto.prev)
+        if dto.limit:
+            query = query.limit(dto.limit)
+        else:
+            query = query.limit(self._get_default_limit())
+        posts = query.all()
+
+        return [
+            PostEntity(
+                id=post.id,
+                attachments=post.attachments,
+                caption=post.caption,
+                creator=post.creator,
+                tags=post.tags,
+                comments=post.comments,
+                created_at=post.created_at,
+                updated_at=post.updated_at,
+            )
+            for post in posts
+        ]
+
+    def _get_default_limit(self):
+        return 24
 
 
 class CreatePostUsecase(PostUsecase):
