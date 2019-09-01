@@ -6,7 +6,7 @@ from typing import List
 @dataclass
 class PostEntity:
     id: int = None
-    images: List = None
+    attachments: List = None
     caption: str = None
     creator: int = None
     tags: List = None

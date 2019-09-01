@@ -1,5 +1,6 @@
 import abc
 from typing import Any
+from apps.posts.schemas import CreatePostResponseSchema
 
 
 class Presenter:
@@ -13,4 +14,4 @@ class Presenter:
 class CreatePostPresenter(Presenter):
     @classmethod
     def process(cls, data: Any = None) -> dict:
-        return {'data': {'result': True}}
+        return {'data': CreatePostResponseSchema().dump(data)}

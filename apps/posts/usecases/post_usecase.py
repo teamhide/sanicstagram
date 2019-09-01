@@ -39,6 +39,16 @@ class CreatePostUsecase(PostUsecase):
             print(e)
             session.rollback()
             raise UploadErrorException
+        return PostEntity(
+            id=post.id,
+            attachments=post.attachments,
+            caption=post.caption,
+            creator=post.creator,
+            tags=post.tags,
+            comments=post.comments,
+            created_at=post.created_at,
+            updated_at=post.updated_at,
+        )
 
     # TODO: S3에 업로드하는 코드 추가 필요
     def _upload_attachment(self, attachment) -> str:

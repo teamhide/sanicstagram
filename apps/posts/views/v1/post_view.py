@@ -50,14 +50,14 @@ class PostList(HTTPMethodView):
         except ValidationError:
             raise ValidationErrorException
 
-        CreatePostUsecase().execute(
+        post = CreatePostUsecase().execute(
             dto=CreatePostDto(
                 **validator,
                 attachments=request.files['attachments'],
                 user_id=request['user_id'],
             )
         )
-        response = CreatePostPresenter.process()
+        response = CreatePostPresenter.process(data=post)
         return json(body=response)
 
 
