@@ -6,21 +6,25 @@ from core.databases.mixin import TimestampMixin
 
 post_tag = Table(
     'post_tag',
+    Base.metadata,
     Column('post_id', ForeignKey('posts.id'), primary_key=True),
     Column('tag_id', ForeignKey('tags.id'), primary_key=True),
 )
-post_image = Table(
-    'post_image',
+post_attachment = Table(
+    'post_attachment',
+    Base.metadata,
     Column('post_id', ForeignKey('posts.id'), primary_key=True),
-    Column('image_id', ForeignKey('images.id'), primary_key=True),
+    Column('attachment_id', ForeignKey('attachments.id'), primary_key=True),
 )
 post_comment = Table(
     'post_comment',
+    Base.metadata,
     Column('post_id', ForeignKey('posts.id'), primary_key=True),
     Column('comment_id', ForeignKey('comments.id'), primary_key=True),
 )
 comment_tag = Table(
     'comment_tag',
+    Base.metadata,
     Column('post_id', ForeignKey('comments.id'), primary_key=True),
     Column('tag_id', ForeignKey('tags.id'), primary_key=True),
 )
@@ -30,9 +34,9 @@ class Post(Base, TimestampMixin):
     __tablename__ = 'posts'
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
-    images = relationship(
-        'Image',
-        secondary=post_image,
+    attachments = relationship(
+        'Attachment',
+        secondary=post_attachment,
         lazy='subquery',
         backref=backref('posts', lazy=True)
     )
@@ -67,8 +71,8 @@ class Comment(Base, TimestampMixin):
     )
 
 
-class Image(Base, TimestampMixin):
-    __tablename__ = 'images'
+class Attachment(Base, TimestampMixin):
+    __tablename__ = 'attachments'
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     path = Column(Unicode(length=255), nullable=False)

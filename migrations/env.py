@@ -28,6 +28,7 @@ fileConfig(config.config_file_name)
 from core.databases import Base
 from core.settings import get_config
 from apps.users.models import *
+from apps.posts.models import *
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
