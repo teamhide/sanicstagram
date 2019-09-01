@@ -17,20 +17,20 @@ class AttachmentSchema(Schema):
     path = fields.Str()
 
 
-class CreatePostResponseSchema(Schema):
+class PostSchema(Schema):
     id = fields.Int()
-    attachments = fields.List(fields.Nested(AttachmentSchema))
     caption = fields.Str()
     creator = fields.Int()
+
+
+class CreatePostResponseSchema(PostSchema):
+    attachments = fields.List(fields.Nested(AttachmentSchema))
     comments = fields.List(fields.Nested(CommentSchema))
     tags = fields.List(fields.Nested(TagSchema))
 
 
-class FeedViewPostResponseSchema(Schema):
-    id = fields.Int()
+class FeedViewPostResponseSchema(PostSchema):
     attachments = fields.List(fields.Nested(AttachmentSchema))
-    caption = fields.Str()
-    creator = fields.Int()
     comments = fields.List(fields.Nested(CommentSchema))
     tags = fields.List(fields.Nested(TagSchema))
     created_at = fields.DateTime()
