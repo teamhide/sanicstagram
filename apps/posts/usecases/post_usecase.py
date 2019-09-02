@@ -56,9 +56,10 @@ class CreatePostUsecase(PostUsecase):
             caption=dto.caption,
             creator=dto.user_id,
         )
-        for attachment in dto.attachments:
-            path = self._upload_attachment(attachment=attachment)
-            post.attachments.append(Attachment(path=path))
+        if dto.attachments:
+            for attachment in dto.attachments:
+                path = self._upload_attachment(attachment=attachment)
+                post.attachments.append(Attachment(path=path))
 
         try:
             session.add(post)
