@@ -8,7 +8,7 @@ class TagSchema(Schema):
 class CommentSchema(Schema):
     id = fields.Int()
     body = fields.Str()
-    creator = fields.Int()
+    creator = fields.Str()
     tags = fields.Nested(TagSchema)
 
 
@@ -20,7 +20,7 @@ class AttachmentSchema(Schema):
 class PostSchema(Schema):
     id = fields.Int()
     caption = fields.Str()
-    creator = fields.Int()
+    creator = fields.Str()
 
 
 class CreatePostResponseSchema(PostSchema):

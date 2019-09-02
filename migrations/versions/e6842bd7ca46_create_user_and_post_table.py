@@ -1,8 +1,8 @@
-"""users and post model
+"""create user and post table
 
-Revision ID: 7e138d33c1e1
+Revision ID: e6842bd7ca46
 Revises: 
-Create Date: 2019-09-01 21:51:02.374269
+Create Date: 2019-09-02 13:37:59.861944
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7e138d33c1e1'
+revision = 'e6842bd7ca46'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -52,8 +52,8 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('body', sa.Unicode(length=200), nullable=False),
-    sa.Column('creator', sa.BigInteger(), nullable=False),
-    sa.ForeignKeyConstraint(['creator'], ['users.id'], ),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('follows',
@@ -67,8 +67,8 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('caption', sa.Unicode(length=255), nullable=True),
-    sa.Column('creator', sa.BigInteger(), nullable=False),
-    sa.ForeignKeyConstraint(['creator'], ['users.id'], ),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('comment_tag',

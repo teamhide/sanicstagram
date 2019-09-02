@@ -22,10 +22,10 @@ class GetPostUsecase(PostUsecase):
 
 class FeedViewPostUsecase(PostUsecase):
     def execute(self, dto: FeedViewPostDto) -> List[PostEntity]:
-        query = session.query(Post).filter(Post.creator != dto.user_id)\
+        query = session.query(Post).filter(Post.user_id != dto.user_id)\
             .order_by(Post.id.desc())
         if dto.prev:
-            query = query.filter(Post.id < dto.prev)
+            query = query.filter(Post.id > dto.prev)
         if dto.limit:
             query = query.limit(dto.limit)
         else:
@@ -37,7 +37,7 @@ class FeedViewPostUsecase(PostUsecase):
                 id=post.id,
                 attachments=post.attachments,
                 caption=post.caption,
-                creator=post.creator,
+                creator=post.creator.nickname,
                 tags=post.tags,
                 comments=post.comments,
                 created_at=post.created_at,
@@ -54,7 +54,7 @@ class CreatePostUsecase(PostUsecase):
     def execute(self, dto: CreatePostDto) -> PostEntity:
         post = Post(
             caption=dto.caption,
-            creator=dto.user_id,
+            user_id=dto.user_id,
         )
         if dto.attachments:
             for attachment in dto.attachments:
@@ -72,7 +72,7 @@ class CreatePostUsecase(PostUsecase):
             id=post.id,
             attachments=post.attachments,
             caption=post.caption,
-            creator=post.creator,
+            creator=post.creator.nickname,
             tags=post.tags,
             comments=post.comments,
             created_at=post.created_at,

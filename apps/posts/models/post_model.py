@@ -41,7 +41,8 @@ class Post(Base, TimestampMixin):
         backref=backref('posts', lazy=True)
     )
     caption = Column(Unicode(length=255), nullable=True)
-    creator = Column(ForeignKey('users.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False)
+    creator = relationship('User')
     comments = relationship(
         'Comment',
         secondary=post_comment,
@@ -62,7 +63,8 @@ class Comment(Base, TimestampMixin):
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     body = Column(Unicode(length=200), nullable=False)
-    creator = Column(ForeignKey('users.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False)
+    creator = relationship('User')
     tags = relationship(
         'Tag',
         secondary=comment_tag,
