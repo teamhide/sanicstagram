@@ -8,8 +8,11 @@ class TagSchema(Schema):
 class CommentSchema(Schema):
     id = fields.Int()
     body = fields.Str()
-    creator = fields.Str()
-    tags = fields.Nested(TagSchema)
+    creator = fields.Method('get_creator')
+    tags = fields.List(fields.Nested(TagSchema))
+
+    def get_creator(self, obj):
+        return obj.creator.nickname
 
 
 class AttachmentSchema(Schema):
