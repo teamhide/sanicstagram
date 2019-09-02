@@ -21,7 +21,7 @@ def init_listeners(app: Sanic, config):
 
     @app.middleware('response')
     async def close_session(request, response):
-        session.close()
+        session.remove()
 
 
 def init_blueprints(app: Sanic):
