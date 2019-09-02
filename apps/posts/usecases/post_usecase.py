@@ -1,11 +1,12 @@
-from typing import List, Union, NoReturn
+import re
+from typing import List, Union, NoReturn, Optional
 from uuid import uuid4
 
 import sqlalchemy.exc
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto)
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.posts.models import (Post, Attachment, Comment)
+from apps.posts.models import (Post, Attachment, Comment, Tag)
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
                              CreateRowException)
@@ -57,10 +58,8 @@ class CreatePostUsecase(PostUsecase):
             caption=dto.caption,
             user_id=dto.user_id,
         )
-        if dto.attachments:
-            for attachment in dto.attachments:
-                path = self._upload_attachment(attachment=attachment)
-                post.attachments.append(Attachment(path=path))
+        self._process_attachments(dto=dto, post=post)
+        self._process_tags(dto=dto, post=post)
 
         try:
             session.add(post)
@@ -80,12 +79,46 @@ class CreatePostUsecase(PostUsecase):
             updated_at=post.updated_at,
         )
 
+    def _process_attachments(
+        self,
+        dto: CreatePostDto,
+        post: Post,
+    ) -> Optional[Post]:
+        if not dto.attachments:
+            return
+
+        for attachment in dto.attachments:
+            path = self._upload_attachment(attachment=attachment)
+            post.attachments.append(Attachment(path=path))
+        return post
+
+    def _process_tags(self, dto: CreatePostDto, post: Post) -> Optional[Post]:
+        tags = self._extract_tags(caption=dto.caption)
+        if not tags:
+            return
+
+        # TODO: refactoring
+        for tag in tags:
+            exist_tag = session.query(Tag).filter(Tag.name == tag).first()
+            if not exist_tag:
+                post.tags.append(Tag(name=tag))
+            else:
+                post.tags.append(exist_tag)
+        return post
+
+    def _get_tag(self, name: str) -> bool:
+        return session.query(Tag).filter(Tag.name == name).first()
+
     # TODO: S3에 업로드하는 코드 추가 필요
     def _upload_attachment(self, attachment) -> str:
         # 파일 객체의 실제 내용은 attachment.body에 담겨있음
         filename = uuid4().hex
         extension = attachment.name.split('.')[-1]
         return f'{filename}.{extension}'
+
+    def _extract_tags(self, caption: str) -> List:
+        pattern = r'#(\w+)'
+        return re.findall(pattern=pattern, string=caption)
 
 
 class LikePostUsecase(PostUsecase):
