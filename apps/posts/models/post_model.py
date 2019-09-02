@@ -48,7 +48,6 @@ class Post(Base, TimestampMixin):
         secondary=post_comment,
         lazy='subquery',
         backref=backref('posts', lazy=True)
-
     )
     tags = relationship(
         'Tag',

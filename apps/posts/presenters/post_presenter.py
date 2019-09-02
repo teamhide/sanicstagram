@@ -2,7 +2,8 @@ import abc
 from typing import Any
 
 from apps.posts.schemas import (CreatePostResponseSchema,
-                                FeedViewPostResponseSchema)
+                                FeedViewPostResponseSchema,
+                                CreateCommentResponseSchema)
 
 
 class Presenter:
@@ -23,3 +24,9 @@ class FeedViewPostPresenter(Presenter):
     @classmethod
     def process(cls, data: Any = None) -> dict:
         return {'data': FeedViewPostResponseSchema().dump(data, many=True)}
+
+
+class CreateCommentPresenter(Presenter):
+    @classmethod
+    def process(cls, data: Any = None) -> dict:
+        return {'data': CreateCommentResponseSchema().dump(data)}

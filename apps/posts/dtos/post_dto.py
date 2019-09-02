@@ -14,3 +14,10 @@ class FeedViewPostDto:
     user_id: int = None
     prev: int = None
     limit: int = None
+
+
+@dataclass
+class CreateCommentDto:
+    user_id: int = None
+    post_id: int = None
+    body: str = None

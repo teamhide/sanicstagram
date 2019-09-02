@@ -1,13 +1,14 @@
-from typing import List
+from typing import List, Union, NoReturn
 from uuid import uuid4
 
 import sqlalchemy.exc
 
-from apps.posts.dtos import CreatePostDto, FeedViewPostDto
+from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto)
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.posts.models import Post, Attachment
+from apps.posts.models import (Post, Attachment, Comment)
 from core.databases import session
-from core.exceptions import UploadErrorException
+from core.exceptions import (UploadErrorException, NotFoundErrorException,
+                             CreateRowException)
 
 
 class PostUsecase:
@@ -51,7 +52,7 @@ class FeedViewPostUsecase(PostUsecase):
 
 
 class CreatePostUsecase(PostUsecase):
-    def execute(self, dto: CreatePostDto) -> PostEntity:
+    def execute(self, dto: CreatePostDto) -> Union[PostEntity, NoReturn]:
         post = Post(
             caption=dto.caption,
             user_id=dto.user_id,
@@ -98,8 +99,28 @@ class UnLikePostUsecase(PostUsecase):
 
 
 class CreateCommentUsecase(PostUsecase):
-    def execute(self, dto) -> CommentEntity:
-        pass
+    def execute(self, dto: CreateCommentDto) -> Union[CommentEntity, NoReturn]:
+        post = session.query(Post).filter(Post.id == dto.post_id).first()
+        if not post:
+            raise NotFoundErrorException
+
+        comment = Comment(
+            body=dto.body,
+            user_id=dto.user_id,
+        )
+        try:
+            post.comments.append(comment)
+            session.add(post)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise CreateRowException
+        return CommentEntity(
+            id=comment.id,
+            body=comment.body,
+            creator=comment.creator.nickname,
+        )
 
 
 class SearchPostUsecase(PostUsecase):

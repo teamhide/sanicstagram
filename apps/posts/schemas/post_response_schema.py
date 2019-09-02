@@ -35,3 +35,9 @@ class FeedViewPostResponseSchema(PostSchema):
     tags = fields.List(fields.Nested(TagSchema))
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+
+
+class CreateCommentResponseSchema(PostSchema):
+    id = fields.Int()
+    body = fields.Str()
+    creator = fields.Str()

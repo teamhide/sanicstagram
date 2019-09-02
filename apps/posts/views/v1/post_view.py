@@ -5,10 +5,14 @@ from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
 
-from apps.posts.dtos import (CreatePostDto, FeedViewPostDto)
-from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter)
-from apps.posts.schemas import (CreatePostSchema, FeedViewPostSchema)
-from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase)
+from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto)
+from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
+                                   CreateCommentPresenter)
+from apps.posts.schemas import (CreatePostRequestSchema,
+                                FeedViewPostRequestSchema,
+                                CreateCommentRequestSchema)
+from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
+                                 CreateCommentUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -43,7 +47,7 @@ class PostList(HTTPMethodView):
 
     async def get(self, request: Request) -> Union[json, NoReturn]:
         try:
-            validator = FeedViewPostSchema().load(data=request.args)
+            validator = FeedViewPostRequestSchema().load(data=request.args)
         except ValidationError:
             raise ValidationErrorException
 
@@ -58,7 +62,7 @@ class PostList(HTTPMethodView):
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
         try:
-            validator = CreatePostSchema().load(data=request.form)
+            validator = CreatePostRequestSchema().load(data=request.form)
         except ValidationError:
             raise ValidationErrorException
 
@@ -96,14 +100,28 @@ class UnLikePost(HTTPMethodView):
 
 
 class Comment(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
-    async def get(
+    async def post(
         self,
         request: Request,
-        user_id: int,
+        post_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        try:
+            validator = CreateCommentRequestSchema().load(data=request.form)
+        except ValidationError as e:
+            print(e)
+            raise ValidationErrorException
+
+        comment = CreateCommentUsecase().execute(
+            dto=CreateCommentDto(
+                **validator,
+                post_id=post_id,
+                user_id=request['user_id'],
+            ),
+        )
+        response = CreateCommentPresenter.process(data=comment)
+        return json(body=response)
 
 
 class SearchPost(HTTPMethodView):

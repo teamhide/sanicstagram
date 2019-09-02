@@ -48,3 +48,10 @@ class UploadErrorException(SanicException):
     def __init__(self):
         message = 'Upload error exception'
         super().__init__(message)
+
+
+@add_status_code(404)
+class CreateRowException(SanicException):
+    def __init__(self):
+        message = 'Create row exception'
+        super().__init__(message)
