@@ -29,15 +29,27 @@ class PostSchema(Schema):
 class CreatePostResponseSchema(PostSchema):
     attachments = fields.List(fields.Nested(AttachmentSchema))
     comments = fields.List(fields.Nested(CommentSchema))
-    tags = fields.List(fields.Nested(TagSchema))
+    tags = fields.Method('get_tags')
+
+    def get_tags(self, obj):
+        return [
+            tag.name
+            for tag in obj.tags
+        ]
 
 
 class FeedViewPostResponseSchema(PostSchema):
     attachments = fields.List(fields.Nested(AttachmentSchema))
     comments = fields.List(fields.Nested(CommentSchema))
-    tags = fields.List(fields.Nested(TagSchema))
+    tags = fields.Method('get_tags')
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+
+    def get_tags(self, obj):
+        return [
+            tag.name
+            for tag in obj.tags
+        ]
 
 
 class CreateCommentResponseSchema(PostSchema):
