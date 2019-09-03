@@ -173,7 +173,7 @@ class UnLikePostUsecase(PostUsecase):
             user_id=dto.user_id,
         )
         if not exist_like:
-            return
+            raise AlreadyDoneException
         try:
             session.delete(exist_like)
             session.commit()
