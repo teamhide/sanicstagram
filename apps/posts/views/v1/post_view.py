@@ -94,7 +94,7 @@ class LikePost(HTTPMethodView):
                 post_id=post_id,
             )
         )
-        response = LikePostPresenter.process()
+        response = await LikePostPresenter.process()
         return json(body=response)
 
 
@@ -112,7 +112,7 @@ class UnLikePost(HTTPMethodView):
                 post_id=post_id,
             )
         )
-        response = UnLikePostPresenter.process()
+        response = await UnLikePostPresenter.process()
         return json(body=response)
 
 

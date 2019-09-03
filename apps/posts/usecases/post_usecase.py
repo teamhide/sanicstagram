@@ -7,20 +7,27 @@ import sqlalchemy.orm
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
-                             DeleteCommentDto)
+                             DeleteCommentDto, LikePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.posts.models import (Post, Attachment, Comment, Tag)
+from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
-                             CreateRowException, DeleteRowException)
+                             CreateRowException, DeleteRowException,
+                             AlreadyDoneException)
 
 
 class PostUsecase:
     def __init__(self):
         pass
 
-    async def _is_liked(self, post_id: int, user_id: int) -> bool:
-        pass
+    async def get_likes(
+        self,
+        post_id: int,
+        user_id: int,
+    ) -> Optional[PostLike]:
+        return session.query(PostLike)\
+            .filter(PostLike.post_id == post_id, Post.user_id == user_id)\
+            .first()
 
 
 class GetPostUsecase(PostUsecase):
@@ -139,17 +146,48 @@ class CreatePostUsecase(PostUsecase):
 
 
 class LikePostUsecase(PostUsecase):
-    async def execute(self, dto) -> None:
-        like = session.query(Post).filter().first()
+    async def execute(self, dto: LikePostDto) -> None:
+        exist_like = await self.get_likes(
+            post_id=dto.post_id,
+            user_id=dto.user_id,
+        )
+        if exist_like:
+            raise AlreadyDoneException
+        like = PostLike(
+            post_id=dto.post_id,
+            user_id=dto.user_id,
+        )
+        try:
+            session.add(like)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise CreateRowException
 
 
 class UnLikePostUsecase(PostUsecase):
     async def execute(self, dto) -> None:
-        pass
+        exist_like = await self.get_likes(
+            post_id=dto.post_id,
+            user_id=dto.user_id,
+        )
+        if not exist_like:
+            return
+        try:
+            session.delete(exist_like)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise DeleteRowException
 
 
 class CreateCommentUsecase(PostUsecase):
-    async def execute(self, dto: CreateCommentDto) -> Union[CommentEntity, NoReturn]:
+    async def execute(
+        self,
+        dto: CreateCommentDto,
+    ) -> Union[CommentEntity, NoReturn]:
         post = session.query(Post).filter(Post.id == dto.post_id).first()
         if not post:
             raise NotFoundErrorException

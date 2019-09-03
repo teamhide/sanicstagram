@@ -62,3 +62,10 @@ class DeleteRowException(SanicException):
     def __init__(self):
         message = 'Delete row exception'
         super().__init__(message)
+
+
+@add_status_code(404)
+class AlreadyDoneException(SanicException):
+    def __init__(self):
+        message = 'Already done exception'
+        super().__init__(message)
