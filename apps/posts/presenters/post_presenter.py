@@ -30,3 +30,9 @@ class CreateCommentPresenter(Presenter):
     @classmethod
     def process(cls, data: Any = None) -> dict:
         return {'data': CreateCommentResponseSchema().dump(data)}
+
+
+class DeleteCommentPresenter(Presenter):
+    @classmethod
+    def process(cls, data: Any = None) -> dict:
+        return {'data': {'status': True}}

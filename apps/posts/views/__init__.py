@@ -9,4 +9,5 @@ bp.add_route(PostList.as_view(), '/posts')
 bp.add_route(LikePost.as_view(), '/posts/<post_id:int>/like')
 bp.add_route(UnLikePost.as_view(), '/posts/<post_id:int>/unlike')
 bp.add_route(Comment.as_view(), '/posts/<post_id:int>/comment')
+bp.add_route(Comment.as_view(), '/posts/<post_id:int>/comment/<comment_id:int>')  # noqa
 bp.add_route(SearchPost.as_view(), '/posts/search')

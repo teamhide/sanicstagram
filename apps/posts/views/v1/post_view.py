@@ -5,14 +5,17 @@ from sanic.request import Request
 from sanic.response import json
 from sanic.views import HTTPMethodView
 
-from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto)
+from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
+                             DeleteCommentDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
-                                   CreateCommentPresenter)
+                                   CreateCommentPresenter,
+                                   DeleteCommentPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
-                                CreateCommentRequestSchema)
+                                CreateCommentRequestSchema,
+                                DeleteCommentRequestSchema)
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
-                                 CreateCommentUsecase)
+                                 CreateCommentUsecase, DeleteCommentUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -121,6 +124,26 @@ class Comment(HTTPMethodView):
             ),
         )
         response = CreateCommentPresenter.process(data=comment)
+        return json(body=response)
+
+    async def delete(
+        self,
+        request: Request,
+        post_id: int,
+        comment_id: int,
+    ) -> Union[json, NoReturn]:
+        try:
+            validator = DeleteCommentRequestSchema().load(
+                data={'post_id': post_id, 'comment_id': comment_id},
+            )
+        except ValidationError as e:
+            print(e)
+            raise ValidationErrorException
+
+        DeleteCommentUsecase().execute(
+            dto=DeleteCommentDto(**validator, user_id=request['user_id']),
+        )
+        response = DeleteCommentPresenter.process()
         return json(body=response)
 
 

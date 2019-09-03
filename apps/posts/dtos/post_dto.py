@@ -21,3 +21,10 @@ class CreateCommentDto:
     user_id: int = None
     post_id: int = None
     body: str = None
+
+
+@dataclass
+class DeleteCommentDto:
+    user_id: int = None
+    post_id: int = None
+    comment_id: int = None

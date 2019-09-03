@@ -3,13 +3,16 @@ from typing import List, Union, NoReturn, Optional
 from uuid import uuid4
 
 import sqlalchemy.exc
+import sqlalchemy.orm
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
-from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto)
+from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
+                             DeleteCommentDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.models import (Post, Attachment, Comment, Tag)
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
-                             CreateRowException)
+                             CreateRowException, DeleteRowException)
 
 
 class PostUsecase:
@@ -154,6 +157,25 @@ class CreateCommentUsecase(PostUsecase):
             body=comment.body,
             creator=comment.creator.nickname,
         )
+
+
+class DeleteCommentUsecase(PostUsecase):
+    def execute(self, dto: DeleteCommentDto) -> Optional[NoReturn]:
+        try:
+            comment = session.query(Comment)\
+                .filter(
+                Comment.id == dto.comment_id,
+                Comment.user_id == dto.user_id,
+            ).first()
+            session.delete(comment)
+            session.commit()
+        except UnmappedInstanceError as e:
+            print(e)
+            raise NotFoundErrorException
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise DeleteRowException
 
 
 class SearchPostUsecase(PostUsecase):

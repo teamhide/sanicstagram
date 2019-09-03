@@ -13,3 +13,8 @@ class FeedViewPostRequestSchema(Schema):
 
 class CreateCommentRequestSchema(Schema):
     body = fields.Str(required=True)
+
+
+class DeleteCommentRequestSchema(Schema):
+    post_id = fields.Int(required=True)
+    comment_id = fields.Int(required=True)
