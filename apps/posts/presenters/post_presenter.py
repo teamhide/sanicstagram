@@ -36,3 +36,15 @@ class DeleteCommentPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
         return {'data': {'status': True}}
+
+
+class LikePostPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': {'status': True}}
+
+
+class UnLikePostPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': {'status': True}}

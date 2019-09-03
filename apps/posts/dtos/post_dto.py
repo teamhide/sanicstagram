@@ -28,3 +28,15 @@ class DeleteCommentDto:
     user_id: int = None
     post_id: int = None
     comment_id: int = None
+
+
+@dataclass
+class LikePostDto:
+    user_id: int = None
+    post_id: int = None
+
+
+@dataclass
+class UnLikePostDto:
+    user_id: int = None
+    post_id: int = None

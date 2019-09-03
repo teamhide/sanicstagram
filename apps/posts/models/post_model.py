@@ -55,6 +55,7 @@ class Post(Base, TimestampMixin):
         lazy='subquery',
         backref=backref('posts', lazy=True),
     )
+    likes = relationship('PostLike')
 
 
 class Comment(Base, TimestampMixin):
@@ -84,3 +85,11 @@ class Tag(Base, TimestampMixin):
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     name = Column(Unicode(length=50), nullable=False)
+
+
+class PostLike(Base, TimestampMixin):
+    __tablename__ = 'post_like'
+
+    id = Column(BigInteger, autoincrement=True, primary_key=True)
+    post_id = Column(ForeignKey('posts.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False)

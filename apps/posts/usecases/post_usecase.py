@@ -19,6 +19,9 @@ class PostUsecase:
     def __init__(self):
         pass
 
+    async def _is_liked(self, post_id: int, user_id: int) -> bool:
+        pass
+
 
 class GetPostUsecase(PostUsecase):
     async def execute(self, dto) -> PostEntity:
@@ -137,7 +140,7 @@ class CreatePostUsecase(PostUsecase):
 
 class LikePostUsecase(PostUsecase):
     async def execute(self, dto) -> None:
-        pass
+        like = session.query(Post).filter().first()
 
 
 class UnLikePostUsecase(PostUsecase):

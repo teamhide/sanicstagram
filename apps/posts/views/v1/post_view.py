@@ -6,16 +6,16 @@ from sanic.response import json
 from sanic.views import HTTPMethodView
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
-                             DeleteCommentDto)
+                             DeleteCommentDto, LikePostDto, UnLikePostDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
                                    CreateCommentPresenter,
-                                   DeleteCommentPresenter)
+                                   DeleteCommentPresenter, LikePostPresenter, UnLikePostPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
                                 CreateCommentRequestSchema,
                                 DeleteCommentRequestSchema)
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
-                                 CreateCommentUsecase, DeleteCommentUsecase)
+                                 CreateCommentUsecase, DeleteCommentUsecase, LikePostUsecase, UnLikePostUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -81,25 +81,39 @@ class PostList(HTTPMethodView):
 
 
 class LikePost(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
-    async def get(
+    async def post(
         self,
         request: Request,
-        user_id: int,
+        post_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        await LikePostUsecase().execute(
+            dto=LikePostDto(
+                user_id=request['user_id'],
+                post_id=post_id,
+            )
+        )
+        response = LikePostPresenter.process()
+        return json(body=response)
 
 
 class UnLikePost(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
-    async def get(
+    async def post(
         self,
         request: Request,
-        user_id: int,
+        post_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        await UnLikePostUsecase().execute(
+            dto=UnLikePostDto(
+                user_id=request['user_id'],
+                post_id=post_id,
+            )
+        )
+        response = UnLikePostPresenter.process()
+        return json(body=response)
 
 
 class Comment(HTTPMethodView):
