@@ -7,9 +7,11 @@ import sqlalchemy.orm
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
-                             DeleteCommentDto, LikePostDto)
+                             DeleteCommentDto, LikePostDto,
+                             GetPostLikedUsersDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
+from apps.users.entities import UserEntity
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
                              CreateRowException, DeleteRowException,
@@ -44,7 +46,7 @@ class FeedViewPostUsecase(PostUsecase):
         if dto.limit:
             query = query.limit(dto.limit)
         else:
-            query = query.limit(self._get_default_limit())
+            query = query.limit(await self._get_default_limit())
         posts = query.all()
 
         return [
@@ -61,7 +63,7 @@ class FeedViewPostUsecase(PostUsecase):
             for post in posts
         ]
 
-    def _get_default_limit(self):
+    async def _get_default_limit(self):
         return 24
 
 
@@ -233,3 +235,33 @@ class DeleteCommentUsecase(PostUsecase):
 class SearchPostUsecase(PostUsecase):
     async def execute(self, dto) -> PostEntity:
         pass
+
+
+class GetPostLikedUsersUsecase(PostUsecase):
+    async def execute(self, dto: GetPostLikedUsersDto) -> List[UserEntity]:
+        query = session.query(PostLike)\
+            .filter(
+            PostLike.post_id == dto.post_id,
+            PostLike.user_id == dto.user_id,
+        )
+        if dto.prev:
+            query = query.filter(PostLike.id > dto.prev)
+        if dto.limit:
+            query = query.limit(dto.limit)
+        else:
+            query = query.limit(await self._get_default_limit())
+        post_like = query.all()
+
+        return [
+            UserEntity(
+                id=like.user.id,
+                nickname=like.user.nickname,
+                profile_image=like.user.profile_image,
+                bio=like.user.bio,
+                website=like.user.website,
+            )
+            for like in post_like
+        ]
+
+    async def _get_default_limit(self):
+        return 24

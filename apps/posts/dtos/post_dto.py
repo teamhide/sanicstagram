@@ -40,3 +40,11 @@ class LikePostDto:
 class UnLikePostDto:
     user_id: int = None
     post_id: int = None
+
+
+@dataclass
+class GetPostLikedUsersDto:
+    user_id: int = None
+    post_id: int = None
+    prev: int = None
+    limit: int = None

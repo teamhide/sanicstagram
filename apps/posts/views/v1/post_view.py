@@ -6,16 +6,22 @@ from sanic.response import json
 from sanic.views import HTTPMethodView
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
-                             DeleteCommentDto, LikePostDto, UnLikePostDto)
+                             DeleteCommentDto, LikePostDto, UnLikePostDto,
+                             GetPostLikedUsersDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
                                    CreateCommentPresenter,
-                                   DeleteCommentPresenter, LikePostPresenter, UnLikePostPresenter)
+                                   DeleteCommentPresenter, LikePostPresenter,
+                                   UnLikePostPresenter,
+                                   GetPostLikedUsersPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
                                 CreateCommentRequestSchema,
-                                DeleteCommentRequestSchema)
+                                DeleteCommentRequestSchema,
+                                GetPostLikedUsersRequestSchema)
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
-                                 CreateCommentUsecase, DeleteCommentUsecase, LikePostUsecase, UnLikePostUsecase)
+                                 CreateCommentUsecase, DeleteCommentUsecase,
+                                 LikePostUsecase, UnLikePostUsecase,
+                                 GetPostLikedUsersUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -162,7 +168,7 @@ class Comment(HTTPMethodView):
 
 
 class SearchPost(HTTPMethodView):
-    decorators = []
+    decorators = [extract_user_id_from_token()]
 
     async def get(
         self,
@@ -170,3 +176,30 @@ class SearchPost(HTTPMethodView):
         user_id: int,
     ) -> Union[json, NoReturn]:
         pass
+
+
+class GetPostLikedUsers(HTTPMethodView):
+    decorators = [extract_user_id_from_token()]
+
+    async def get(
+        self,
+        request: Request,
+        post_id: int,
+    ) -> Union[json, NoReturn]:
+        try:
+            validator = GetPostLikedUsersRequestSchema().load(
+                data=request.args,
+            )
+        except ValidationError as e:
+            print(e)
+            raise ValidationErrorException
+
+        users = await GetPostLikedUsersUsecase().execute(
+            dto=GetPostLikedUsersDto(
+                **validator,
+                user_id=request['user_id'],
+                post_id=post_id,
+            ),
+        )
+        response = await GetPostLikedUsersPresenter.process(data=users)
+        return json(body=response)

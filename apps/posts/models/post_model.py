@@ -93,3 +93,4 @@ class PostLike(Base, TimestampMixin):
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     post_id = Column(ForeignKey('posts.id'), nullable=False)
     user_id = Column(ForeignKey('users.id'), nullable=False)
+    user = relationship('User')

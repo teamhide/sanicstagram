@@ -18,3 +18,8 @@ class CreateCommentRequestSchema(Schema):
 class DeleteCommentRequestSchema(Schema):
     post_id = fields.Int(required=True)
     comment_id = fields.Int(required=True)
+
+
+class GetPostLikedUsersRequestSchema(Schema):
+    prev = fields.Int(required=False)
+    limit = fields.Int(required=False)

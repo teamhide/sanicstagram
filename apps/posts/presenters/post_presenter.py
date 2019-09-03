@@ -4,6 +4,7 @@ from typing import Any
 from apps.posts.schemas import (CreatePostResponseSchema,
                                 FeedViewPostResponseSchema,
                                 CreateCommentResponseSchema)
+from apps.users.schemas import GetUserResponseSchema
 
 
 class Presenter:
@@ -48,3 +49,10 @@ class UnLikePostPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
         return {'data': {'status': True}}
+
+
+class GetPostLikedUsersPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        print(data)
+        return {'data': GetUserResponseSchema().dump(data, many=True)}
