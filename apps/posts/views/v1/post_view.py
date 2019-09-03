@@ -54,13 +54,13 @@ class PostList(HTTPMethodView):
         except ValidationError:
             raise ValidationErrorException
 
-        posts = FeedViewPostUsecase().execute(
+        posts = await FeedViewPostUsecase().execute(
             dto=FeedViewPostDto(
                 **validator,
                 user_id=request['user_id'],
             )
         )
-        response = FeedViewPostPresenter.process(data=posts)
+        response = await FeedViewPostPresenter.process(data=posts)
         return json(body=response)
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
@@ -69,14 +69,14 @@ class PostList(HTTPMethodView):
         except ValidationError:
             raise ValidationErrorException
 
-        post = CreatePostUsecase().execute(
+        post = await CreatePostUsecase().execute(
             dto=CreatePostDto(
                 **validator,
                 attachments=request.files.get('attachments'),
                 user_id=request['user_id'],
             )
         )
-        response = CreatePostPresenter.process(data=post)
+        response = await CreatePostPresenter.process(data=post)
         return json(body=response)
 
 
@@ -116,14 +116,14 @@ class Comment(HTTPMethodView):
             print(e)
             raise ValidationErrorException
 
-        comment = CreateCommentUsecase().execute(
+        comment = await CreateCommentUsecase().execute(
             dto=CreateCommentDto(
                 **validator,
                 post_id=post_id,
                 user_id=request['user_id'],
             ),
         )
-        response = CreateCommentPresenter.process(data=comment)
+        response = await CreateCommentPresenter.process(data=comment)
         return json(body=response)
 
     async def delete(
@@ -140,10 +140,10 @@ class Comment(HTTPMethodView):
             print(e)
             raise ValidationErrorException
 
-        DeleteCommentUsecase().execute(
+        await DeleteCommentUsecase().execute(
             dto=DeleteCommentDto(**validator, user_id=request['user_id']),
         )
-        response = DeleteCommentPresenter.process()
+        response = await DeleteCommentPresenter.process()
         return json(body=response)
 
 

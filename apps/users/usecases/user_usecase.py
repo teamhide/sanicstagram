@@ -20,7 +20,7 @@ class UserUsecase:
 
 
 class GetUserUsecase(UserUsecase):
-    def execute(self, dto: GetUserDto) -> UserEntity:
+    async def execute(self, dto: GetUserDto) -> UserEntity:
         user = session.query(User)\
             .filter(User.nickname == dto.nickname).first()
         if not user:
@@ -37,22 +37,22 @@ class GetUserUsecase(UserUsecase):
 
 
 class RegisterUserUsecase(UserUsecase):
-    def execute(self, dto):
+    async def execute(self, dto):
         pass
 
 
 class GetUserListUsecase(UserUsecase):
-    def execute(self, dto):
+    async def execute(self, dto):
         pass
 
 
 class UpdateUserUsecase(UserUsecase):
-    def execute(self, dto):
+    async def execute(self, dto):
         pass
 
 
 class FollowUserUsecase(UserUsecase):
-    def execute(self, dto: FollowUserDto) -> None:
+    async def execute(self, dto: FollowUserDto) -> None:
         if self._is_followed(
                 user_id=dto.user_id,
                 target_user_id=dto.follow_user_id,
@@ -72,7 +72,7 @@ class FollowUserUsecase(UserUsecase):
 
 
 class UnFollowUserUsecase(UserUsecase):
-    def execute(self, dto: UnFollowUserDto) -> None:
+    async def execute(self, dto: UnFollowUserDto) -> None:
         if not self._is_followed(
                 user_id=dto.user_id,
                 target_user_id=dto.follow_user_id,
@@ -92,7 +92,7 @@ class UnFollowUserUsecase(UserUsecase):
 
 
 class ExploreUsersUsecase(UserUsecase):
-    def execute(self) -> Optional[List[UserEntity]]:
+    async def execute(self) -> Optional[List[UserEntity]]:
         users = session.query(User).order_by(User.id.desc()).all()[:5]
         if not users:
             return
@@ -109,18 +109,18 @@ class ExploreUsersUsecase(UserUsecase):
 
 
 class LoginUsecase(UserUsecase):
-    def execute(self, dto):
+    async def execute(self, dto):
         pass
 
-    def _default_login(self):
+    async def _default_login(self):
         pass
 
-    def _social_login(self):
+    async def _social_login(self):
         pass
 
 
 class GetUserFollowersUsecase(UserUsecase):
-    def execute(self, user_id: int) -> List[UserEntity]:
+    async def execute(self, user_id: int) -> List[UserEntity]:
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
             raise NotFoundErrorException
@@ -139,7 +139,7 @@ class GetUserFollowersUsecase(UserUsecase):
 
 
 class GetUserFollowingsUsecase(UserUsecase):
-    def execute(self, user_id: int) -> List[UserEntity]:
+    async def execute(self, user_id: int) -> List[UserEntity]:
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
             raise NotFoundErrorException
@@ -158,7 +158,7 @@ class GetUserFollowingsUsecase(UserUsecase):
 
 
 class SearchUserUsecase(UserUsecase):
-    def execute(self, nickname: str) -> List[UserEntity]:
+    async def execute(self, nickname: str) -> List[UserEntity]:
         users = session.query(User)\
             .filter(User.nickname.like(nickname)).all()
         return [

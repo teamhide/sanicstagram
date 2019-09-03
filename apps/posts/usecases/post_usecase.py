@@ -21,12 +21,12 @@ class PostUsecase:
 
 
 class GetPostUsecase(PostUsecase):
-    def execute(self, dto) -> PostEntity:
+    async def execute(self, dto) -> PostEntity:
         pass
 
 
 class FeedViewPostUsecase(PostUsecase):
-    def execute(self, dto: FeedViewPostDto) -> List[PostEntity]:
+    async def execute(self, dto: FeedViewPostDto) -> List[PostEntity]:
         query = session.query(Post).filter(Post.user_id != dto.user_id)\
             .order_by(Post.id.desc())
         if dto.prev:
@@ -56,13 +56,13 @@ class FeedViewPostUsecase(PostUsecase):
 
 
 class CreatePostUsecase(PostUsecase):
-    def execute(self, dto: CreatePostDto) -> Union[PostEntity, NoReturn]:
+    async def execute(self, dto: CreatePostDto) -> Union[PostEntity, NoReturn]:
         post = Post(
             caption=dto.caption,
             user_id=dto.user_id,
         )
-        self._process_attachments(dto=dto, post=post)
-        self._process_tags(dto=dto, post=post)
+        await self._process_attachments(dto=dto, post=post)
+        await self._process_tags(dto=dto, post=post)
 
         try:
             session.add(post)
@@ -82,7 +82,7 @@ class CreatePostUsecase(PostUsecase):
             updated_at=post.updated_at,
         )
 
-    def _process_attachments(
+    async def _process_attachments(
         self,
         dto: CreatePostDto,
         post: Post,
@@ -95,7 +95,7 @@ class CreatePostUsecase(PostUsecase):
             post.attachments.append(Attachment(path=path))
         return post
 
-    def _process_tags(self, dto: CreatePostDto, post: Post) -> Optional[Post]:
+    async def _process_tags(self, dto: CreatePostDto, post: Post) -> Optional[Post]:
         tags = self._extract_tags(caption=dto.caption)
         if not tags:
             return
@@ -109,7 +109,7 @@ class CreatePostUsecase(PostUsecase):
                 post.tags.append(exist_tag)
         return post
 
-    def _get_tag(self, name: str) -> bool:
+    async def _get_tag(self, name: str) -> bool:
         return session.query(Tag).filter(Tag.name == name).first()
 
     # TODO: S3에 업로드하는 코드 추가 필요
@@ -125,17 +125,17 @@ class CreatePostUsecase(PostUsecase):
 
 
 class LikePostUsecase(PostUsecase):
-    def execute(self, dto) -> None:
+    async def execute(self, dto) -> None:
         pass
 
 
 class UnLikePostUsecase(PostUsecase):
-    def execute(self, dto) -> None:
+    async def execute(self, dto) -> None:
         pass
 
 
 class CreateCommentUsecase(PostUsecase):
-    def execute(self, dto: CreateCommentDto) -> Union[CommentEntity, NoReturn]:
+    async def execute(self, dto: CreateCommentDto) -> Union[CommentEntity, NoReturn]:
         post = session.query(Post).filter(Post.id == dto.post_id).first()
         if not post:
             raise NotFoundErrorException
@@ -160,7 +160,7 @@ class CreateCommentUsecase(PostUsecase):
 
 
 class DeleteCommentUsecase(PostUsecase):
-    def execute(self, dto: DeleteCommentDto) -> Optional[NoReturn]:
+    async def execute(self, dto: DeleteCommentDto) -> Optional[NoReturn]:
         try:
             comment = session.query(Comment)\
                 .filter(
@@ -179,5 +179,5 @@ class DeleteCommentUsecase(PostUsecase):
 
 
 class SearchPostUsecase(PostUsecase):
-    def execute(self, dto) -> PostEntity:
+    async def execute(self, dto) -> PostEntity:
         pass
