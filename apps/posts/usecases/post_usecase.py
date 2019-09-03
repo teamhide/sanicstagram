@@ -95,19 +95,30 @@ class CreatePostUsecase(PostUsecase):
             post.attachments.append(Attachment(path=path))
         return post
 
-    async def _process_tags(self, dto: CreatePostDto, post: Post) -> Optional[Post]:
+    async def _process_tags(
+        self,
+        dto: CreatePostDto,
+        post: Post,
+    ) -> Optional[Post]:
         tags = self._extract_tags(caption=dto.caption)
         if not tags:
             return
+        exist_tags = await self._extract_exist_tags(tags=tags)
 
-        # TODO: refactoring
         for tag in tags:
-            exist_tag = session.query(Tag).filter(Tag.name == tag).first()
-            if not exist_tag:
-                post.tags.append(Tag(name=tag))
-            else:
+            if tag in exist_tags:
+                exist_tag = session.query(Tag).filter(Tag.name == tag).first()
                 post.tags.append(exist_tag)
+            else:
+                post.tags.append(Tag(name=tag))
         return post
+
+    async def _extract_exist_tags(self, tags: List) -> List:
+        tags = session.query(Tag.name).filter(Tag.name.in_(tags)).all()
+        return [
+            tag[0]
+            for tag in tags
+        ]
 
     async def _get_tag(self, name: str) -> bool:
         return session.query(Tag).filter(Tag.name == name).first()
