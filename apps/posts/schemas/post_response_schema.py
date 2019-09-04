@@ -46,6 +46,8 @@ class FeedViewPostResponseSchema(PostSchema):
     updated_at = fields.DateTime()
 
     def get_tags(self, obj):
+        if not obj or not obj.tags:
+            return []
         return [
             tag.name
             for tag in obj.tags

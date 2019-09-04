@@ -48,3 +48,11 @@ class GetPostLikedUsersDto:
     post_id: int = None
     prev: int = None
     limit: int = None
+
+
+@dataclass
+class SearchTagDto:
+    user_id: int = None
+    prev: int = None
+    limit: int = None
+    tag: str = None

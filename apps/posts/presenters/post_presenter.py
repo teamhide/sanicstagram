@@ -54,5 +54,10 @@ class UnLikePostPresenter(Presenter):
 class GetPostLikedUsersPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
-        print(data)
         return {'data': GetUserResponseSchema().dump(data, many=True)}
+
+
+class SearchTagPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': FeedViewPostResponseSchema().dump(data, many=True)}

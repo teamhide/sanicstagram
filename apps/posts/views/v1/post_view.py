@@ -7,21 +7,23 @@ from sanic.views import HTTPMethodView
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto, UnLikePostDto,
-                             GetPostLikedUsersDto)
+                             GetPostLikedUsersDto, SearchTagDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
                                    CreateCommentPresenter,
                                    DeleteCommentPresenter, LikePostPresenter,
                                    UnLikePostPresenter,
-                                   GetPostLikedUsersPresenter)
+                                   GetPostLikedUsersPresenter,
+                                   SearchTagPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
                                 CreateCommentRequestSchema,
                                 DeleteCommentRequestSchema,
-                                GetPostLikedUsersRequestSchema)
+                                GetPostLikedUsersRequestSchema,
+                                SearchTagRequestSchema)
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
                                  CreateCommentUsecase, DeleteCommentUsecase,
                                  LikePostUsecase, UnLikePostUsecase,
-                                 GetPostLikedUsersUsecase)
+                                 GetPostLikedUsersUsecase, SearchTagUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -176,6 +178,23 @@ class SearchPost(HTTPMethodView):
         user_id: int,
     ) -> Union[json, NoReturn]:
         pass
+
+
+class SearchTag(HTTPMethodView):
+    decorators = [extract_user_id_from_token()]
+
+    async def get(self, request: Request) -> Union[json, NoReturn]:
+        try:
+            validator = SearchTagRequestSchema().load(data=request.args)
+        except ValidationError as e:
+            print(e)
+            raise ValidationErrorException
+
+        posts = await SearchTagUsecase().execute(
+            dto=SearchTagDto(**validator, user_id=request['user_id']),
+        )
+        response = await SearchTagPresenter.process(data=posts)
+        return json(body=response)
 
 
 class GetPostLikedUsers(HTTPMethodView):

@@ -23,3 +23,9 @@ class DeleteCommentRequestSchema(Schema):
 class GetPostLikedUsersRequestSchema(Schema):
     prev = fields.Int(required=False)
     limit = fields.Int(required=False)
+
+
+class SearchTagRequestSchema(Schema):
+    prev = fields.Int(required=False)
+    limit = fields.Int(required=False)
+    tag = fields.Str(required=True)

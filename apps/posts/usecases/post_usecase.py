@@ -8,8 +8,9 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
-                             GetPostLikedUsersDto)
+                             GetPostLikedUsersDto, SearchTagDto)
 from apps.posts.entities import PostEntity, CommentEntity
+from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
 from apps.users.entities import UserEntity
 from core.databases import session
@@ -43,10 +44,10 @@ class FeedViewPostUsecase(PostUsecase):
             .order_by(Post.id.desc())
         if dto.prev:
             query = query.filter(Post.id > dto.prev)
-        if dto.limit:
+        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
             query = query.limit(dto.limit)
         else:
-            query = query.limit(await self._get_default_limit())
+            query = query.limit(DefaultPaging.LIMIT.value)
         posts = query.all()
 
         return [
@@ -62,9 +63,6 @@ class FeedViewPostUsecase(PostUsecase):
             )
             for post in posts
         ]
-
-    async def _get_default_limit(self):
-        return 24
 
 
 class CreatePostUsecase(PostUsecase):
@@ -246,10 +244,10 @@ class GetPostLikedUsersUsecase(PostUsecase):
         )
         if dto.prev:
             query = query.filter(PostLike.id > dto.prev)
-        if dto.limit:
+        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
             query = query.limit(dto.limit)
         else:
-            query = query.limit(await self._get_default_limit())
+            query = query.limit(DefaultPaging.LIMIT.value)
         post_like = query.all()
 
         return [
@@ -263,5 +261,27 @@ class GetPostLikedUsersUsecase(PostUsecase):
             for like in post_like
         ]
 
-    async def _get_default_limit(self):
-        return 24
+
+class SearchTagUsecase(PostUsecase):
+    async def execute(self, dto: SearchTagDto) -> List[PostEntity]:
+        query = session.query(Post).filter(Tag.name.in_([dto.tag]))\
+            .order_by(Post.id.desc())
+        if dto.prev:
+            query = query.filter(Post.id > dto.prev)
+        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
+            query = query.limit(DefaultPaging.LIMIT.value)
+        posts = query.all()
+
+        return [
+            PostEntity(
+                id=post.id,
+                attachments=post.attachments,
+                caption=post.caption,
+                creator=post.creator.nickname,
+                tags=post.tags,
+                comments=post.comments,
+                created_at=post.created_at,
+                updated_at=post.updated_at,
+            )
+            for post in posts
+        ]
