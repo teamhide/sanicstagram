@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
                              GetPostLikedUsersDto, SearchTagDto, DeletePostDto,
-                             GetPostDto)
+                             GetPostDto, UpdatePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
@@ -17,7 +17,7 @@ from apps.users.entities import UserEntity
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
                              CreateRowException, DeleteRowException,
-                             AlreadyDoneException)
+                             AlreadyDoneException, UpdateRowException)
 
 
 class PostUsecase:
@@ -327,3 +327,36 @@ class DeletePostUsecase(PostUsecase):
         except sqlalchemy.exc.IntegrityError as e:
             print(e)
             raise DeleteRowException
+
+
+class UpdatePostUsecase(PostUsecase):
+    async def execute(self, dto: UpdatePostDto) -> Optional[NoReturn]:
+        post = session.query(Post)\
+            .filter(
+            Post.id == dto.post_id,
+            Post.user_id == dto.user_id,
+        ).first()
+        if not post:
+            raise NotFoundErrorException
+
+        await self._process_update_post(post=post, dto=dto)
+
+        try:
+            session.add(post)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise UpdateRowException
+
+    async def _process_update_post(
+        self,
+        post: Post,
+        dto: UpdatePostDto,
+    ) -> None:
+        if dto.reuse_attachment_id:
+            pass
+        if dto.attachments:
+            pass
+        if dto.caption:
+            post.caption = dto.caption

@@ -74,3 +74,9 @@ class GetPostDetailPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
         return {'data': PostDetailResponseSchema().dump(data)}
+
+
+class UpdatePostPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': PostDetailResponseSchema().dump(data)}

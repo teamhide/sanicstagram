@@ -68,3 +68,12 @@ class DeletePostDto:
 class GetPostDto:
     user_id: int = None
     post_id: int = None
+
+
+@dataclass
+class UpdatePostDto:
+    user_id: int = None
+    post_id: int = None
+    caption: str = None
+    reuse_attachment_id: int = None
+    attachments: List = None
