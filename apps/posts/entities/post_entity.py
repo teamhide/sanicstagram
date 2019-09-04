@@ -12,7 +12,7 @@ class PostEntity:
     tags: List = None
     comments: List = None
     is_liked: bool = None
-    like_count: bool = None
+    like_count: int = None
     created_at: datetime = None
     updated_at: datetime = None
 
