@@ -3,7 +3,8 @@ from typing import Any
 
 from apps.posts.schemas import (CreatePostResponseSchema,
                                 FeedViewPostResponseSchema,
-                                CreateCommentResponseSchema)
+                                CreateCommentResponseSchema,
+                                PostDetailResponseSchema)
 from apps.users.schemas import GetUserResponseSchema
 
 
@@ -67,3 +68,9 @@ class DeletePostPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
         return {'data': {'status': True}}
+
+
+class GetPostDetailPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': PostDetailResponseSchema().dump(data)}

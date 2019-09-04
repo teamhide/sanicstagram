@@ -62,3 +62,9 @@ class SearchTagDto:
 class DeletePostDto:
     user_id: int = None
     post_id: int = None
+
+
+@dataclass
+class GetPostDto:
+    user_id: int = None
+    post_id: int = None

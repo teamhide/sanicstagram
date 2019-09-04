@@ -8,7 +8,8 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
-                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto)
+                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto,
+                             GetPostDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
@@ -33,9 +34,32 @@ class PostUsecase:
             .first()
 
 
-class GetPostUsecase(PostUsecase):
-    async def execute(self, dto) -> PostEntity:
-        pass
+class GetPostDetailUsecase(PostUsecase):
+    async def execute(self, dto: GetPostDto) -> Union[PostEntity, NoReturn]:
+        post = session.query(Post).filter(Post.id == dto.post_id).first()
+        if not post:
+            raise NotFoundErrorException
+
+        return PostEntity(
+            id=post.id,
+            attachments=post.attachments,
+            caption=post.caption,
+            creator=post.creator.nickname,
+            tags=post.tags,
+            comments=post.comments,
+            is_liked=self._is_liked(post_id=dto.post_id, user_id=dto.user_id),
+            like_count=post.likes_count,
+            created_at=post.created_at,
+            updated_at=post.updated_at,
+        )
+
+    def _is_liked(self, post_id: int, user_id: int) -> bool:
+        is_liked = session.query(PostLike)\
+            .filter(
+            PostLike.post_id == post_id,
+            PostLike.user_id == user_id,
+        ).first()
+        return is_liked is not None
 
 
 class FeedViewPostUsecase(PostUsecase):

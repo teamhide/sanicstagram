@@ -11,6 +11,8 @@ class PostEntity:
     creator: int = None
     tags: List = None
     comments: List = None
+    is_liked: bool = None
+    like_count: bool = None
     created_at: datetime = None
     updated_at: datetime = None
 

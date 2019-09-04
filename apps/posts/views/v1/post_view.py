@@ -7,13 +7,15 @@ from sanic.views import HTTPMethodView
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto, UnLikePostDto,
-                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto)
+                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto,
+                             GetPostDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
                                    CreateCommentPresenter,
                                    DeleteCommentPresenter, LikePostPresenter,
                                    UnLikePostPresenter,
                                    GetPostLikedUsersPresenter,
-                                   SearchTagPresenter, DeletePostPresenter)
+                                   SearchTagPresenter, DeletePostPresenter,
+                                   GetPostDetailPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
                                 CreateCommentRequestSchema,
@@ -24,7 +26,7 @@ from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
                                  CreateCommentUsecase, DeleteCommentUsecase,
                                  LikePostUsecase, UnLikePostUsecase,
                                  GetPostLikedUsersUsecase, SearchTagUsecase,
-                                 DeletePostUsecase)
+                                 DeletePostUsecase, GetPostDetailUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -37,7 +39,11 @@ class Post(HTTPMethodView):
         request: Request,
         post_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        post = await GetPostDetailUsecase().execute(
+            dto=GetPostDto(post_id=post_id, user_id=request['user_id']),
+        )
+        response = await GetPostDetailPresenter.process(data=post)
+        return json(body=response)
 
     async def put(
         self,

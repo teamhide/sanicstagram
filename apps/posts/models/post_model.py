@@ -1,4 +1,5 @@
 from sqlalchemy import (Column, BigInteger, Unicode, ForeignKey, Table)
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 
 from core.databases import Base
@@ -56,6 +57,10 @@ class Post(Base, TimestampMixin):
         backref=backref('posts', lazy=True),
     )
     likes = relationship('PostLike')
+
+    @hybrid_property
+    def likes_count(self) -> int:
+        return len(self.likes)
 
 
 class Comment(Base, TimestampMixin):
