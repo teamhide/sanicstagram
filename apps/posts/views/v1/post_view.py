@@ -7,13 +7,13 @@ from sanic.views import HTTPMethodView
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto, UnLikePostDto,
-                             GetPostLikedUsersDto, SearchTagDto)
+                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto)
 from apps.posts.presenters import (CreatePostPresenter, FeedViewPostPresenter,
                                    CreateCommentPresenter,
                                    DeleteCommentPresenter, LikePostPresenter,
                                    UnLikePostPresenter,
                                    GetPostLikedUsersPresenter,
-                                   SearchTagPresenter)
+                                   SearchTagPresenter, DeletePostPresenter)
 from apps.posts.schemas import (CreatePostRequestSchema,
                                 FeedViewPostRequestSchema,
                                 CreateCommentRequestSchema,
@@ -23,7 +23,8 @@ from apps.posts.schemas import (CreatePostRequestSchema,
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
                                  CreateCommentUsecase, DeleteCommentUsecase,
                                  LikePostUsecase, UnLikePostUsecase,
-                                 GetPostLikedUsersUsecase, SearchTagUsecase)
+                                 GetPostLikedUsersUsecase, SearchTagUsecase,
+                                 DeletePostUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 
@@ -50,7 +51,14 @@ class Post(HTTPMethodView):
         request: Request,
         post_id: int,
     ) -> Union[json, NoReturn]:
-        pass
+        await DeletePostUsecase().execute(
+            dto=DeletePostDto(
+                user_id=request['user_id'],
+                post_id=post_id,
+            )
+        )
+        response = await DeletePostPresenter.process()
+        return json(body=response)
 
 
 class PostList(HTTPMethodView):

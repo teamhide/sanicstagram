@@ -61,3 +61,9 @@ class SearchTagPresenter(Presenter):
     @classmethod
     async def process(cls, data: Any = None) -> dict:
         return {'data': FeedViewPostResponseSchema().dump(data, many=True)}
+
+
+class DeletePostPresenter(Presenter):
+    @classmethod
+    async def process(cls, data: Any = None) -> dict:
+        return {'data': {'status': True}}

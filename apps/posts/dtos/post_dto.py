@@ -56,3 +56,9 @@ class SearchTagDto:
     prev: int = None
     limit: int = None
     tag: str = None
+
+
+@dataclass
+class DeletePostDto:
+    user_id: int = None
+    post_id: int = None

@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
-                             GetPostLikedUsersDto, SearchTagDto)
+                             GetPostLikedUsersDto, SearchTagDto, DeletePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
@@ -285,3 +285,21 @@ class SearchTagUsecase(PostUsecase):
             )
             for post in posts
         ]
+
+
+class DeletePostUsecase(PostUsecase):
+    async def execute(self, dto: DeletePostDto) -> Optional[NoReturn]:
+        post = session.query(Post)\
+            .filter(
+            Post.id == dto.post_id,
+            Post.user_id == dto.user_id,
+        ).first()
+        if not post:
+            raise NotFoundErrorException
+
+        try:
+            session.delete(post)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            raise DeleteRowException
