@@ -38,6 +38,6 @@ class CommentEntity:
 @dataclass
 class TagEntity:
     id: int = None
-    name: int = None
+    name: str = None
     created_at: datetime = None
     updated_at: datetime = None
