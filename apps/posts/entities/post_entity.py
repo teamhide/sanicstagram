@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 
 @dataclass
@@ -35,8 +35,8 @@ class PostEntity:
     attachments: List = None
     caption: str = None
     creator: int = None
-    tags: List[TagEntity] = None
-    comments: List[CommentEntity] = None
+    tags: Union[List[str], List] = None
+    comments: Union[List[CommentEntity], List] = None
     is_liked: bool = None
     like_count: int = None
     created_at: datetime = None

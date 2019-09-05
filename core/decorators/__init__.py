@@ -13,7 +13,7 @@ def is_jwt_authenticated():
         @wraps(f)
         async def decorated_function(request, *args, **kwargs):
             try:
-                token = request.headers.get('Authorization').split('Bearer ')[1]
+                token = request.headers.get('Authorization').split('Bearer ')[1]  # noqa
             except (IndexError, AttributeError):
                 raise TokenHeaderException
 
@@ -54,7 +54,7 @@ def extract_user_id_from_token():
         @wraps(f)
         async def decorated_function(request, *args, **kwargs):
             try:
-                token = request.headers.get('Authorization').split('Bearer ')[1]
+                token = request.headers.get('Authorization').split('Bearer ')[1]  # noqa
             except (IndexError, AttributeError):
                 raise TokenHeaderException
 
