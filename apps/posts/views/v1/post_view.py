@@ -21,12 +21,14 @@ from apps.posts.schemas import (CreatePostRequestSchema,
                                 CreateCommentRequestSchema,
                                 DeleteCommentRequestSchema,
                                 GetPostLikedUsersRequestSchema,
-                                SearchTagRequestSchema, UpdatePostRequestSchema)
+                                SearchTagRequestSchema,
+                                UpdatePostRequestSchema)
 from apps.posts.usecases import (CreatePostUsecase, FeedViewPostUsecase,
                                  CreateCommentUsecase, DeleteCommentUsecase,
                                  LikePostUsecase, UnLikePostUsecase,
                                  GetPostLikedUsersUsecase, SearchTagUsecase,
-                                 DeletePostUsecase, GetPostDetailUsecase, UpdatePostUsecase)
+                                 DeletePostUsecase, GetPostDetailUsecase,
+                                 UpdatePostUsecase)
 from core.decorators import extract_user_id_from_token
 from core.exceptions import ValidationErrorException
 

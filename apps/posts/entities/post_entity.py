@@ -12,19 +12,19 @@ class ImageEntity:
 
 
 @dataclass
-class CommentEntity:
+class TagEntity:
     id: int = None
-    body: str = None
-    creator: int = None
-    tags: List = None
+    name: str = None
     created_at: datetime = None
     updated_at: datetime = None
 
 
 @dataclass
-class TagEntity:
+class CommentEntity:
     id: int = None
-    name: str = None
+    body: str = None
+    creator: int = None
+    tags: List[TagEntity] = None
     created_at: datetime = None
     updated_at: datetime = None
 
@@ -35,8 +35,8 @@ class PostEntity:
     attachments: List = None
     caption: str = None
     creator: int = None
-    tags: List = None
-    comments: CommentEntity = None
+    tags: List[TagEntity] = None
+    comments: List[CommentEntity] = None
     is_liked: bool = None
     like_count: int = None
     created_at: datetime = None

@@ -9,7 +9,8 @@ from apps.users.dtos import (FollowUserDto, UnFollowUserDto, GetUserDto)
 from apps.users.presenters import (ExploreUsersPresenter, GetUserPresenter,
                                    UserFollowersPresenter, FollowUserPresenter,
                                    UnFollowUserPresenter,
-                                   UserFollowingsPresenter, SearchUserPresenter)
+                                   UserFollowingsPresenter,
+                                   SearchUserPresenter)
 from apps.users.schemas import GetUserRequestSchema, SearchUserRequestSchema
 from apps.users.usecases import (FollowUserUsecase, UnFollowUserUsecase,
                                  ExploreUsersUsecase, GetUserUsecase,
