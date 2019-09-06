@@ -1,4 +1,7 @@
 from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from core.settings import get_config
 
 import pytest
 
@@ -15,3 +18,18 @@ async def app():
 @pytest.fixture
 def current_time():
     return datetime.utcnow().replace(microsecond=0)
+
+
+@pytest.yield_fixture
+def session():
+    engine = create_engine(get_config().db_url)
+    db_session = scoped_session(
+        sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=engine,
+        )
+    )
+    yield db_session
+    db_session.rollback()
+    db_session.remove()
