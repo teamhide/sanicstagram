@@ -13,6 +13,7 @@ from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
+from apps.posts.repositories import PostRepository
 from apps.users.entities import UserEntity
 from core.databases import session
 from core.exceptions import (UploadErrorException, NotFoundErrorException,
@@ -22,71 +23,27 @@ from core.exceptions import (UploadErrorException, NotFoundErrorException,
 
 class PostUsecase:
     def __init__(self):
-        pass
-
-    async def get_likes(
-        self,
-        post_id: int,
-        user_id: int,
-    ) -> Optional[PostLike]:
-        return session.query(PostLike)\
-            .filter(PostLike.post_id == post_id, Post.user_id == user_id)\
-            .first()
+        self.repository = PostRepository()
 
 
 class GetPostDetailUsecase(PostUsecase):
     async def execute(self, dto: GetPostDto) -> Union[PostEntity, NoReturn]:
-        post = session.query(Post).filter(Post.id == dto.post_id).first()
-        if not post:
+        post_entity = self.repository.get_post(post_id=dto.post_id)
+        if not post_entity:
             raise NotFoundErrorException
 
-        return PostEntity(
-            id=post.id,
-            attachments=post.attachments,
-            caption=post.caption,
-            creator=post.creator.nickname,
-            tags=post.tags,
-            comments=post.comments,
-            is_liked=self._is_liked(post_id=dto.post_id, user_id=dto.user_id),
-            like_count=post.likes_count,
-            created_at=post.created_at,
-            updated_at=post.updated_at,
-        )
-
-    def _is_liked(self, post_id: int, user_id: int) -> bool:
-        is_liked = session.query(PostLike)\
-            .filter(
-            PostLike.post_id == post_id,
-            PostLike.user_id == user_id,
-        ).first()
-        return is_liked is not None
+        post_entity.is_liked = True if self.repository.get_likes(post_id=dto.post_id, user_id=dto.user_id) else False  # noqa
+        return post_entity
 
 
 class FeedViewPostUsecase(PostUsecase):
     async def execute(self, dto: FeedViewPostDto) -> List[PostEntity]:
-        query = session.query(Post).filter(Post.user_id != dto.user_id)\
-            .order_by(Post.id.desc())
-        if dto.prev:
-            query = query.filter(Post.id > dto.prev)
-        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
-            query = query.limit(dto.limit)
-        else:
-            query = query.limit(DefaultPaging.LIMIT.value)
-        posts = query.all()
-
-        return [
-            PostEntity(
-                id=post.id,
-                attachments=post.attachments,
-                caption=post.caption,
-                creator=post.creator.nickname,
-                tags=post.tags,
-                comments=post.comments,
-                created_at=post.created_at,
-                updated_at=post.updated_at,
-            )
-            for post in posts
-        ]
+        return self.repository.get_post_list(
+            user_id=dto.user_id,
+            prev=dto.prev,
+            limit=dto.limit,
+            order=True,
+        )
 
 
 class CreatePostUsecase(PostUsecase):
@@ -171,11 +128,7 @@ class CreatePostUsecase(PostUsecase):
 
 class LikePostUsecase(PostUsecase):
     async def execute(self, dto: LikePostDto) -> None:
-        exist_like = await self.get_likes(
-            post_id=dto.post_id,
-            user_id=dto.user_id,
-        )
-        if exist_like:
+        if self.repository.get_likes(post_id=dto.post_id, user_id=dto.user_id):
             raise AlreadyDoneException
         like = PostLike(
             post_id=dto.post_id,
