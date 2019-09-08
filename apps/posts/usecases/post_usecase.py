@@ -4,21 +4,20 @@ from uuid import uuid4
 
 import sqlalchemy.exc
 import sqlalchemy.orm
-from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
                              GetPostLikedUsersDto, SearchTagDto, DeletePostDto,
                              GetPostDto, UpdatePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.posts.enum import DefaultPaging
-from apps.posts.models import (Post, Comment, Tag, PostLike)
+from apps.posts.models import (Post)
 from apps.posts.repositories import PostPSQLRepository
 from apps.users.entities import UserEntity
 from core.databases import session
 from core.exceptions import (NotFoundErrorException,
-                             CreateRowException, DeleteRowException,
-                             AlreadyDoneException, UpdateRowException)
+                             DeleteRowException,
+                             AlreadyDoneException, UpdateRowException,
+                             PermissionException)
 
 
 class PostUsecase:
@@ -32,7 +31,7 @@ class GetPostDetailUsecase(PostUsecase):
         if not post_entity:
             raise NotFoundErrorException
 
-        post_entity.is_liked = True if self.repository.get_likes(post_id=dto.post_id, user_id=dto.user_id) else False  # noqa
+        post_entity.is_liked = True if self.repository.get_like(post_id=dto.post_id, user_id=dto.user_id) else False  # noqa
         return post_entity
 
 
@@ -134,97 +133,50 @@ class SearchPostUsecase(PostUsecase):
 
 class GetPostLikedUsersUsecase(PostUsecase):
     async def execute(self, dto: GetPostLikedUsersDto) -> List[UserEntity]:
-        query = session.query(PostLike)\
-            .filter(
-            PostLike.post_id == dto.post_id,
-            PostLike.user_id == dto.user_id,
+        liked_users = self.repository.get_post_liked_users(
+            post_id=dto.post_id,
+            prev=dto.prev,
+            limit=dto.limit,
         )
-        if dto.prev:
-            query = query.filter(PostLike.id > dto.prev)
-        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
-            query = query.limit(dto.limit)
-        else:
-            query = query.limit(DefaultPaging.LIMIT.value)
-        post_like = query.all()
-
-        return [
-            UserEntity(
-                id=like.user.id,
-                nickname=like.user.nickname,
-                profile_image=like.user.profile_image,
-                bio=like.user.bio,
-                website=like.user.website,
-            )
-            for like in post_like
-        ]
+        return liked_users
 
 
 class SearchTagUsecase(PostUsecase):
     async def execute(self, dto: SearchTagDto) -> List[PostEntity]:
-        query = session.query(Post).filter(Tag.name.in_([dto.tag]))\
-            .order_by(Post.id.desc())
-        if dto.prev:
-            query = query.filter(Post.id > dto.prev)
-        if dto.limit and dto.limit < DefaultPaging.LIMIT.value:
-            query = query.limit(DefaultPaging.LIMIT.value)
-        posts = query.all()
-
-        return [
-            PostEntity(
-                id=post.id,
-                attachments=post.attachments,
-                caption=post.caption,
-                creator=post.creator.nickname,
-                tags=post.tags,
-                comments=post.comments,
-                created_at=post.created_at,
-                updated_at=post.updated_at,
-            )
-            for post in posts
-        ]
+        posts = self.repository.get_post_list(
+            user_id=dto.user_id,
+            tag=dto.tag,
+            prev=dto.prev,
+            limit=dto.limit,
+            order=True,
+        )
+        return posts
 
 
 class DeletePostUsecase(PostUsecase):
     async def execute(self, dto: DeletePostDto) -> Optional[NoReturn]:
-        post = session.query(Post)\
-            .filter(
-            Post.id == dto.post_id,
-            Post.user_id == dto.user_id,
-        ).first()
-        if not post:
-            raise NotFoundErrorException
+        post = self.repository.get_post(post_id=dto.post_id)
+        if post.user_id != dto.user_id:
+            raise PermissionException
 
-        try:
-            session.delete(post)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            raise DeleteRowException
+        self.repository.delete_post(post_id=dto.post_id, user_id=dto.user_id)
 
 
 class UpdatePostUsecase(PostUsecase):
     async def execute(self, dto: UpdatePostDto) -> Optional[NoReturn]:
-        post = session.query(Post)\
-            .filter(
-            Post.id == dto.post_id,
-            Post.user_id == dto.user_id,
-        ).first()
-        if not post:
-            raise NotFoundErrorException
+        post = self.repository.get_post(post_id=dto.post_id)
+        if post.user_id != dto.user_id:
+            raise PermissionException
 
-        await self._process_update_post(post=post, dto=dto)
+        await self._process_update_post(dto=dto)
 
-        try:
-            session.add(post)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise UpdateRowException
+        return self.repository.update_post(
+            post_id=dto.post_id,
+            caption=dto.caption,
+        )
 
     async def _process_update_post(
         self,
-        post: Post,
         dto: UpdatePostDto,
     ) -> None:
         if dto.reuse_attachment_id:

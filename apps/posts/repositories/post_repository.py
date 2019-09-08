@@ -4,6 +4,7 @@ from typing import Optional, List, Union, NoReturn
 import sqlalchemy.exc
 
 from apps.posts.entities import PostEntity, CommentEntity
+from apps.users.entities import UserEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, PostLike, Tag, Attachment, Comment)
 from core.databases import session
@@ -27,6 +28,7 @@ class PostRepository:
         user_id: int = None,
         prev: int = None,
         limit: int = None,
+        tag: str = None,
         order: bool = None,
     ) -> List[PostEntity]:
         pass
@@ -36,7 +38,23 @@ class PostRepository:
         pass
 
     @abc.abstractmethod
-    def update_post(self):
+    def get_post_liked_users(
+        self,
+        post_id: int,
+        prev: int = None,
+        limit: int = None,
+    ) -> List[UserEntity]:
+        pass
+
+    @abc.abstractmethod
+    def update_post(
+        self,
+        post_id: int,
+        caption: str = None,
+        tags: List = None,
+        reuse_attachment_id: int = None,
+        attachments: List = None,
+    ) -> Union[PostEntity, NoReturn]:
         pass
 
     @abc.abstractmethod
@@ -52,23 +70,27 @@ class PostRepository:
         post_id: int,
         body: str,
         user_id: int,
-    ) -> CommentEntity:
+    ) -> Union[CommentEntity, NoReturn]:
         pass
 
     @abc.abstractmethod
-    def delete_post(self):
+    def delete_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
         pass
 
     @abc.abstractmethod
-    def delete_comment(self, comment_id: int, user_id: int) -> None:
+    def delete_comment(
+        self,
+        comment_id: int,
+        user_id: int,
+    ) -> Optional[NoReturn]:
         pass
 
     @abc.abstractmethod
-    def like_post(self, post_id: int, user_id: int) -> None:
+    def like_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
         pass
 
     @abc.abstractmethod
-    def unlike_post(self, post_id: int, user_id: int) -> None:
+    def unlike_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
         pass
 
 
@@ -106,12 +128,15 @@ class PostPSQLRepository(PostRepository):
         user_id: int = None,
         prev: int = None,
         limit: int = None,
+        tag: str = None,
         order: bool = None,
     ) -> List[PostEntity]:
         query = session.query(Post)
 
         if user_id:
             query = query.filter(Post.user_id != user_id)
+        if tag:
+            query = query.filter(Tag.name.in_([tag]))
         if order is True:
             query = query.order_by(Post.id.desc())
         if prev:
@@ -141,7 +166,41 @@ class PostPSQLRepository(PostRepository):
             .filter(PostLike.post_id == post_id, Post.user_id == user_id)\
             .first()
 
-    def update_post(self):
+    def get_post_liked_users(
+        self,
+        post_id: int,
+        prev: int = None,
+        limit: int = None,
+    ) -> List[UserEntity]:
+        query = session.query(PostLike).filter(PostLike.post_id == post_id)
+
+        if prev:
+            query = query.filter(PostLike.id > prev)
+        if limit and limit < DefaultPaging.LIMIT.value:
+            query = query.limit(limit)
+        else:
+            query = query.limit(DefaultPaging.LIMIT.value)
+        post_like = query.all()
+
+        return [
+            UserEntity(
+                id=like.user.id,
+                nickname=like.user.nickname,
+                profile_image=like.user.profile_image,
+                bio=like.user.bio,
+                website=like.user.website,
+            )
+            for like in post_like
+        ]
+
+    def update_post(
+        self,
+        post_id: int,
+        caption: str = None,
+        tags: List = None,
+        reuse_attachment_id: int = None,
+        attachments: List = None,
+    ) -> Union[PostEntity, NoReturn]:
         pass
 
     def save_post(
@@ -185,7 +244,7 @@ class PostPSQLRepository(PostRepository):
         post_id: int,
         body: str,
         user_id: int,
-    ) -> CommentEntity:
+    ) -> Union[CommentEntity, NoReturn]:
         post = session.query(Post).filter(Post.id == post_id).first()
         comment = Comment(body=body, user_id=user_id)
 
@@ -203,10 +262,25 @@ class PostPSQLRepository(PostRepository):
             creator=comment.creator.nickname,
         )
 
-    def delete_post(self):
-        pass
+    def delete_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
+        post = session.query(Post).filter(
+            Post.id == post_id,
+            Post.user_id == user_id,
+        ).first()
 
-    def delete_comment(self, comment_id: int, user_id: int) -> None:
+        try:
+            session.delete(post)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise DeleteRowException
+
+    def delete_comment(
+        self,
+        comment_id: int,
+        user_id: int,
+    ) -> Optional[NoReturn]:
         comment = session.query(Comment) \
             .filter(
             Comment.id == comment_id,
@@ -221,7 +295,7 @@ class PostPSQLRepository(PostRepository):
             session.rollback()
             raise DeleteRowException
 
-    def like_post(self, post_id: int, user_id: int) -> None:
+    def like_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
         like = PostLike(
             post_id=post_id,
             user_id=user_id,
@@ -234,7 +308,7 @@ class PostPSQLRepository(PostRepository):
             session.rollback()
             raise DeleteRowException
 
-    def unlike_post(self, post_id: int, user_id: int) -> None:
+    def unlike_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
         like = session.query(PostLike)\
             .filter(post_id=post_id, user_id=user_id).first()
         try:
