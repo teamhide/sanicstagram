@@ -110,7 +110,7 @@ class PostList(HTTPMethodView):
         post = await CreatePostUsecase().execute(
             dto=CreatePostDto(
                 **validator,
-                attachments=request.files.get('attachments'),
+                attachments=request.files,
                 user_id=request['user_id'],
             )
         )

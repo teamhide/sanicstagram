@@ -34,6 +34,7 @@ class PostEntity:
     id: int = None
     attachments: List = None
     caption: str = None
+    user_id: int = None
     creator: int = None
     tags: Union[List[str], List] = None
     comments: Union[List[CommentEntity], List] = None

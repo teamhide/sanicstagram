@@ -12,18 +12,18 @@ from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              GetPostDto, UpdatePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
-from apps.posts.models import (Post, Attachment, Comment, Tag, PostLike)
-from apps.posts.repositories import PostRepository
+from apps.posts.models import (Post, Comment, Tag, PostLike)
+from apps.posts.repositories import PostPSQLRepository
 from apps.users.entities import UserEntity
 from core.databases import session
-from core.exceptions import (UploadErrorException, NotFoundErrorException,
+from core.exceptions import (NotFoundErrorException,
                              CreateRowException, DeleteRowException,
                              AlreadyDoneException, UpdateRowException)
 
 
 class PostUsecase:
     def __init__(self):
-        self.repository = PostRepository()
+        self.repository = PostPSQLRepository()
 
 
 class GetPostDetailUsecase(PostUsecase):
@@ -48,78 +48,35 @@ class FeedViewPostUsecase(PostUsecase):
 
 class CreatePostUsecase(PostUsecase):
     async def execute(self, dto: CreatePostDto) -> Union[PostEntity, NoReturn]:
-        post = Post(
+        post_entity = PostEntity(
             caption=dto.caption,
             user_id=dto.user_id,
         )
-        await self._process_attachments(dto=dto, post=post)
-        await self._process_tags(dto=dto, post=post)
+        if dto.attachments:
+            post_entity.attachments = await self._process_attachments(
+                attachments=dto.attachments['attachments'],
+            )
 
-        try:
-            session.add(post)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise UploadErrorException
-        return PostEntity(
-            id=post.id,
-            attachments=post.attachments,
-            caption=post.caption,
-            creator=post.creator.nickname,
-            tags=post.tags,
-            comments=post.comments,
-            created_at=post.created_at,
-            updated_at=post.updated_at,
-        )
-
-    async def _process_attachments(
-        self,
-        dto: CreatePostDto,
-        post: Post,
-    ) -> Optional[Post]:
-        if not dto.attachments:
-            return
-
-        for attachment in dto.attachments:
-            path = self._upload_attachment(attachment=attachment)
-            post.attachments.append(Attachment(path=path))
-        return post
-
-    async def _process_tags(
-        self,
-        dto: CreatePostDto,
-        post: Post,
-    ) -> Optional[Post]:
         tags = self._extract_tags(caption=dto.caption)
-        if not tags:
-            return
-        exist_tags = await self._extract_exist_tags(tags=tags)
+        if tags:
+            post_entity.tags = tags
 
-        for tag in tags:
-            if tag in exist_tags:
-                exist_tag = session.query(Tag).filter(Tag.name == tag).first()
-                post.tags.append(exist_tag)
-            else:
-                post.tags.append(Tag(name=tag))
-        return post
+        return self.repository.save_post(post_entity=post_entity)
 
-    async def _extract_exist_tags(self, tags: List) -> List:
-        tags = session.query(Tag.name).filter(Tag.name.in_(tags)).all()
+    async def _process_attachments(self, attachments: List) -> List:
         return [
-            tag[0]
-            for tag in tags
+            self._upload_attachment(attachment=attachment)
+            for attachment in attachments
         ]
-
-    async def _get_tag(self, name: str) -> bool:
-        return session.query(Tag).filter(Tag.name == name).first()
 
     # TODO: S3에 업로드하는 코드 추가 필요
     def _upload_attachment(self, attachment) -> str:
         # 파일 객체의 실제 내용은 attachment.body에 담겨있음
-        filename = uuid4().hex
+        return self._encrypt_filename(attachment=attachment)
+
+    def _encrypt_filename(self, attachment) -> str:
         extension = attachment.name.split('.')[-1]
-        return f'{filename}.{extension}'
+        return f'{uuid4().hex}.{extension}'
 
     def _extract_tags(self, caption: str) -> List:
         pattern = r'#(\w+)'
