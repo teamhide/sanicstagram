@@ -108,46 +108,23 @@ class CreateCommentUsecase(PostUsecase):
         self,
         dto: CreateCommentDto,
     ) -> Union[CommentEntity, NoReturn]:
-        post = session.query(Post).filter(Post.id == dto.post_id).first()
+        post = self.repository.get_post(post_id=dto.post_id)
         if not post:
             raise NotFoundErrorException
 
-        comment = Comment(
+        return self.repository.save_comment(
+            post_id=dto.post_id,
             body=dto.body,
             user_id=dto.user_id,
-        )
-        try:
-            post.comments.append(comment)
-            session.add(post)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise CreateRowException
-        return CommentEntity(
-            id=comment.id,
-            body=comment.body,
-            creator=comment.creator.nickname,
         )
 
 
 class DeleteCommentUsecase(PostUsecase):
     async def execute(self, dto: DeleteCommentDto) -> Optional[NoReturn]:
-        try:
-            comment = session.query(Comment)\
-                .filter(
-                Comment.id == dto.comment_id,
-                Comment.user_id == dto.user_id,
-            ).first()
-            session.delete(comment)
-            session.commit()
-        except UnmappedInstanceError as e:
-            print(e)
-            raise NotFoundErrorException
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise DeleteRowException
+        self.repository.delete_comment(
+            comment_id=dto.comment_id,
+            user_id=dto.user_id,
+        )
 
 
 class SearchPostUsecase(PostUsecase):

@@ -3,9 +3,9 @@ from typing import Optional, List, Union, NoReturn
 
 import sqlalchemy.exc
 
-from apps.posts.entities import PostEntity
+from apps.posts.entities import PostEntity, CommentEntity
 from apps.posts.enum import DefaultPaging
-from apps.posts.models import (Post, PostLike, Tag, Attachment)
+from apps.posts.models import (Post, PostLike, Tag, Attachment, Comment)
 from core.databases import session
 from core.exceptions import CreateRowException, DeleteRowException
 
@@ -47,7 +47,20 @@ class PostRepository:
         pass
 
     @abc.abstractmethod
+    def save_comment(
+        self,
+        post_id: int,
+        body: str,
+        user_id: int,
+    ) -> CommentEntity:
+        pass
+
+    @abc.abstractmethod
     def delete_post(self):
+        pass
+
+    @abc.abstractmethod
+    def delete_comment(self, comment_id: int, user_id: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -167,8 +180,46 @@ class PostPSQLRepository(PostRepository):
             updated_at=post.updated_at,
         )
 
+    def save_comment(
+        self,
+        post_id: int,
+        body: str,
+        user_id: int,
+    ) -> CommentEntity:
+        post = session.query(Post).filter(Post.id == post_id).first()
+        comment = Comment(body=body, user_id=user_id)
+
+        try:
+            post.comments.append(comment)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise CreateRowException
+
+        return CommentEntity(
+            id=comment.id,
+            body=comment.body,
+            creator=comment.creator.nickname,
+        )
+
     def delete_post(self):
         pass
+
+    def delete_comment(self, comment_id: int, user_id: int) -> None:
+        comment = session.query(Comment) \
+            .filter(
+            Comment.id == comment_id,
+            Comment.user_id == user_id,
+        ).first()
+
+        try:
+            session.delete(comment)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise DeleteRowException
 
     def like_post(self, post_id: int, user_id: int) -> None:
         like = PostLike(
