@@ -85,36 +85,22 @@ class CreatePostUsecase(PostUsecase):
 
 class LikePostUsecase(PostUsecase):
     async def execute(self, dto: LikePostDto) -> None:
-        if self.repository.get_likes(post_id=dto.post_id, user_id=dto.user_id):
+        if self.repository.get_like(post_id=dto.post_id, user_id=dto.user_id):
             raise AlreadyDoneException
-        like = PostLike(
-            post_id=dto.post_id,
-            user_id=dto.user_id,
-        )
-        try:
-            session.add(like)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise CreateRowException
+
+        self.repository.like_post(post_id=dto.post_id, user_id=dto.user_id)
 
 
 class UnLikePostUsecase(PostUsecase):
     async def execute(self, dto) -> None:
-        exist_like = await self.get_likes(
+        exist_like = await self.repository.get_like(
             post_id=dto.post_id,
             user_id=dto.user_id,
         )
         if not exist_like:
             raise AlreadyDoneException
-        try:
-            session.delete(exist_like)
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as e:
-            print(e)
-            session.rollback()
-            raise DeleteRowException
+
+        self.repository.unlike_post(post_id=dto.post_id, user_id=dto.user_id)
 
 
 class CreateCommentUsecase(PostUsecase):

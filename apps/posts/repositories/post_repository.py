@@ -7,6 +7,7 @@ from apps.posts.entities import PostEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import (Post, PostLike, Tag, Attachment)
 from core.databases import session
+from core.exceptions import CreateRowException, DeleteRowException
 
 
 class PostRepository:
@@ -31,7 +32,7 @@ class PostRepository:
         pass
 
     @abc.abstractmethod
-    def get_likes(self, post_id: int, user_id: int) -> Optional[PostLike]:
+    def get_like(self, post_id: int, user_id: int) -> Optional[PostLike]:
         pass
 
     @abc.abstractmethod
@@ -47,6 +48,14 @@ class PostRepository:
 
     @abc.abstractmethod
     def delete_post(self):
+        pass
+
+    @abc.abstractmethod
+    def like_post(self, post_id: int, user_id: int) -> None:
+        pass
+
+    @abc.abstractmethod
+    def unlike_post(self, post_id: int, user_id: int) -> None:
         pass
 
 
@@ -114,7 +123,7 @@ class PostPSQLRepository(PostRepository):
             for post in posts
         ]
 
-    def get_likes(self, post_id: int, user_id: int) -> Optional[PostLike]:
+    def get_like(self, post_id: int, user_id: int) -> Optional[PostLike]:
         return session.query(PostLike)\
             .filter(PostLike.post_id == post_id, Post.user_id == user_id)\
             .first()
@@ -145,7 +154,7 @@ class PostPSQLRepository(PostRepository):
         except sqlalchemy.exc.IntegrityError as e:
             print(e)
             session.rollback()
-            raise
+            raise CreateRowException
 
         return PostEntity(
             id=post.id,
@@ -160,6 +169,30 @@ class PostPSQLRepository(PostRepository):
 
     def delete_post(self):
         pass
+
+    def like_post(self, post_id: int, user_id: int) -> None:
+        like = PostLike(
+            post_id=post_id,
+            user_id=user_id,
+        )
+        try:
+            session.add(like)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise DeleteRowException
+
+    def unlike_post(self, post_id: int, user_id: int) -> None:
+        like = session.query(PostLike)\
+            .filter(post_id=post_id, user_id=user_id).first()
+        try:
+            session.delete(like)
+            session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
+            session.rollback()
+            raise CreateRowException
 
     def _convert_tags_to_list(self, tags: List) -> List:
         return [
