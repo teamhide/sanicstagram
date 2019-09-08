@@ -4,9 +4,9 @@ from typing import Optional, List, Union, NoReturn
 import sqlalchemy.exc
 
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.users.entities import UserEntity
 from apps.posts.enum import DefaultPaging
-from apps.posts.models import (Post, PostLike, Tag, Attachment, Comment)
+from apps.posts.models import Post, PostLike, Tag, Attachment, Comment
+from apps.users.entities import UserEntity
 from core.databases import session
 from core.exceptions import CreateRowException, DeleteRowException
 

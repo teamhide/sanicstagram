@@ -2,22 +2,15 @@ import re
 from typing import List, Union, NoReturn, Optional
 from uuid import uuid4
 
-import sqlalchemy.exc
-import sqlalchemy.orm
-
 from apps.posts.dtos import (CreatePostDto, FeedViewPostDto, CreateCommentDto,
                              DeleteCommentDto, LikePostDto,
                              GetPostLikedUsersDto, SearchTagDto, DeletePostDto,
                              GetPostDto, UpdatePostDto)
 from apps.posts.entities import PostEntity, CommentEntity
-from apps.posts.models import (Post)
 from apps.posts.repositories import PostPSQLRepository
 from apps.users.entities import UserEntity
-from core.databases import session
 from core.exceptions import (NotFoundErrorException,
-                             DeleteRowException,
-                             AlreadyDoneException, UpdateRowException,
-                             PermissionException)
+                             AlreadyDoneException, PermissionException)
 
 
 class PostUsecase:
@@ -83,7 +76,7 @@ class CreatePostUsecase(PostUsecase):
 
 
 class LikePostUsecase(PostUsecase):
-    async def execute(self, dto: LikePostDto) -> None:
+    async def execute(self, dto: LikePostDto) -> Optional[NoReturn]:
         if self.repository.get_like(post_id=dto.post_id, user_id=dto.user_id):
             raise AlreadyDoneException
 
@@ -91,7 +84,7 @@ class LikePostUsecase(PostUsecase):
 
 
 class UnLikePostUsecase(PostUsecase):
-    async def execute(self, dto) -> None:
+    async def execute(self, dto) -> Optional[NoReturn]:
         exist_like = await self.repository.get_like(
             post_id=dto.post_id,
             user_id=dto.user_id,
@@ -184,4 +177,4 @@ class UpdatePostUsecase(PostUsecase):
         if dto.attachments:
             pass
         if dto.caption:
-            post.caption = dto.caption
+            pass
