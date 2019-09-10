@@ -1,7 +1,18 @@
 import pytest
+
 from tests import current_time
-from apps.posts.entities import PostEntity, CommentEntity, TagEntity
+from apps.posts.entities import (PostEntity, CommentEntity, TagEntity, ImageEntity)
 from apps.users.entities import UserEntity
+
+
+@pytest.fixture
+def image_entity(current_time):
+    return ImageEntity(
+        id=1,
+        path='1.jpg',
+        created_at=current_time,
+        updated_at=current_time,
+    )
 
 
 @pytest.fixture
