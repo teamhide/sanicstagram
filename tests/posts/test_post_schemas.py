@@ -1,38 +1,86 @@
+from apps.posts.schemas import (CreatePostRequestSchema,
+                                FeedViewPostRequestSchema,
+                                CreateCommentRequestSchema,
+                                DeleteCommentRequestSchema,
+                                GetPostLikedUsersRequestSchema,
+                                SearchTagRequestSchema,
+                                UpdatePostRequestSchema,
+                                TagSchema,
+                                CommentSchema,
+                                AttachmentSchema,
+                                PostSchema)
+
+
 def test_create_post_request_schema():
-    pass
+    request = {'attachments': [], 'caption': 'caption'}
+    validator = CreatePostRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['attachments'] == request['attachments']
+    assert validator['caption'] == request['caption']
 
 
 def test_feed_view_post_request_schema():
-    pass
+    request = {'prev': 100, 'limit': 25}
+    validator = FeedViewPostRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['prev'] == request['prev']
+    assert validator['limit'] == request['limit']
 
 
 def test_create_comment_request_schema():
-    pass
+    request = {'body': 'comment'}
+    validator = CreateCommentRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['body'] == request['body']
 
 
 def test_delete_comment_request_schema():
-    pass
+    request = {'post_id': 1, 'comment_id': 1}
+    validator = DeleteCommentRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['post_id'] == request['post_id']
+    assert validator['comment_id'] == request['comment_id']
 
 
 def test_get_post_liked_users_request_schema():
-    pass
+    request = {'prev': 100, 'limit': 25}
+    validator = GetPostLikedUsersRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['prev'] == request['prev']
+    assert validator['limit'] == request['limit']
 
 
 def test_search_tag_request_schema():
-    pass
+    request = {'prev': 100, 'limit': 25, 'tag': 'hashtag'}
+    validator = SearchTagRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['prev'] == request['prev']
+    assert validator['limit'] == request['limit']
+    assert validator['tag'] == request['tag']
 
 
 def test_update_post_request_schema():
-    pass
+    request = {
+        'caption': 'caption',
+        'reuse_attachment_id': 1,
+        'attachments': [],
+    }
+    validator = UpdatePostRequestSchema().load(data=request)
+    assert validator is not None
+    assert validator['caption'] == request['caption']
+    assert validator['reuse_attachment_id'] == request['reuse_attachment_id']
+    assert validator['attachments'] == request['attachments']
 
 
 def test_tag_schema():
-    pass
+    request = {'name': 'name'}
+    validator = TagSchema().load(data=request)
+    assert validator is not None
+    assert validator['name'] == request['name']
 
 
 def test_comment_schema():
     pass
-
 
 def test_attachment_schema():
     pass
