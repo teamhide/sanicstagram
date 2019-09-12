@@ -9,6 +9,7 @@ from apps.posts.schemas import (CreatePostRequestSchema,
                                 CommentSchema,
                                 AttachmentSchema,
                                 PostSchema)
+from tests.posts import comment_entity
 
 
 def test_create_post_request_schema():
@@ -95,8 +96,9 @@ def test_tag_schema():
     assert validator['name'] == request['name']
 
 
-def test_comment_schema():
-    pass
+def test_comment_schema(comment_entity):
+    print(1)
+    # validator = CommentSchema().load(data=comment_entity)
 
 
 def test_attachment_schema():
