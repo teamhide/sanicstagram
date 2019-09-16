@@ -12,6 +12,7 @@ class FeedViewPostRequestSchema(Schema):
 
 
 class CreateCommentRequestSchema(Schema):
+    parent_id = fields.Integer(required=False)
     body = fields.String(required=True)
 
 

@@ -101,6 +101,7 @@ class CreateCommentUsecase(PostUsecase):
         dto: CreateCommentDto,
     ) -> Union[CommentEntity, NoReturn]:
         post = self.repository.get_post(post_id=dto.post_id)
+
         if not post:
             raise NotFoundErrorException
 
@@ -108,6 +109,7 @@ class CreateCommentUsecase(PostUsecase):
             post_id=dto.post_id,
             body=dto.body,
             user_id=dto.user_id,
+            parent_id=dto.parent_id,
         )
 
 

@@ -20,6 +20,7 @@ class FeedViewPostDto:
 class CreateCommentDto:
     user_id: int = None
     post_id: int = None
+    parent_id: int = None
     body: str = None
 
 

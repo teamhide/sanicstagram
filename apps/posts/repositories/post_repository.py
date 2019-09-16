@@ -70,6 +70,7 @@ class PostRepository:
         post_id: int,
         body: str,
         user_id: int,
+        parent_id: int = None,
     ) -> Union[CommentEntity, NoReturn]:
         pass
 
@@ -244,9 +245,13 @@ class PostPSQLRepository(PostRepository):
         post_id: int,
         body: str,
         user_id: int,
+        parent_id: int = None,
     ) -> Union[CommentEntity, NoReturn]:
         post = session.query(Post).filter(Post.id == post_id).first()
-        comment = Comment(body=body, user_id=user_id)
+        if parent_id:
+            comment = Comment(body=body, user_id=user_id, parent_id=parent_id)
+        else:
+            comment = Comment(body=body, user_id=user_id)
 
         try:
             post.comments.append(comment)
