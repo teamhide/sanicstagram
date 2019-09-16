@@ -17,12 +17,6 @@ post_attachment = Table(
     Column('post_id', ForeignKey('posts.id'), primary_key=True),
     Column('attachment_id', ForeignKey('attachments.id'), primary_key=True),
 )
-post_comment = Table(
-    'post_comment',
-    Base.metadata,
-    Column('post_id', ForeignKey('posts.id'), primary_key=True),
-    Column('comment_id', ForeignKey('comments.id'), primary_key=True),
-)
 comment_tag = Table(
     'comment_tag',
     Base.metadata,
@@ -44,12 +38,7 @@ class Post(Base, TimestampMixin):
     caption = Column(Unicode(length=255), nullable=True)
     user_id = Column(ForeignKey('users.id'), nullable=False)
     creator = relationship('User')
-    comments = relationship(
-        'Comment',
-        secondary=post_comment,
-        lazy='subquery',
-        backref=backref('posts', lazy=True)
-    )
+    comments = relationship('Comment')
     tags = relationship(
         'Tag',
         secondary=post_tag,
@@ -68,6 +57,7 @@ class Comment(Base, TimestampMixin):
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     body = Column(Unicode(length=200), nullable=False)
+    post_id = Column(ForeignKey('posts.id'), nullable=False)
     user_id = Column(ForeignKey('users.id'), nullable=False)
     parent_id = Column(ForeignKey('comments.id'), nullable=True)
     creator = relationship('User')
