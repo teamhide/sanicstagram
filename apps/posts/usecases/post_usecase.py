@@ -24,7 +24,11 @@ class GetPostDetailUsecase(PostUsecase):
         if not post_entity:
             raise NotFoundErrorException
 
-        post_entity.is_liked = True if self.repository.get_like(post_id=dto.post_id, user_id=dto.user_id) else False  # noqa
+        if self.repository.get_like(post_id=dto.post_id, user_id=dto.user_id):
+            is_liked = True
+        else:
+            is_liked = False
+        post_entity.is_liked = is_liked
         return post_entity
 
 

@@ -25,6 +25,7 @@ class CommentEntity:
     body: str = None
     creator: int = None
     tags: List[TagEntity] = None
+    comments: List['CommentEntity'] = None
     created_at: datetime = None
     updated_at: datetime = None
 

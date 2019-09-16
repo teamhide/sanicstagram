@@ -71,6 +71,7 @@ class Comment(Base, TimestampMixin):
     user_id = Column(ForeignKey('users.id'), nullable=False)
     parent_id = Column(ForeignKey('comments.id'), nullable=True)
     creator = relationship('User')
+    comments = relationship('Comment')
     tags = relationship(
         'Tag',
         secondary=comment_tag,
