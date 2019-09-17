@@ -44,7 +44,7 @@ class Post(HTTPMethodView):
         post = await GetPostDetailUsecase().execute(
             dto=GetPostDto(post_id=post_id, user_id=request['user_id']),
         )
-        response = await GetPostDetailPresenter.process(data=post)
+        response = await GetPostDetailPresenter.transform(data=post)
         return json(body=response)
 
     async def put(
@@ -65,7 +65,7 @@ class Post(HTTPMethodView):
                 user_id=request['user_id'],
             ),
         )
-        response = await UpdatePostPresenter.process(data=post)
+        response = await UpdatePostPresenter.transform(data=post)
         return json(body=response)
 
     async def delete(
@@ -79,7 +79,7 @@ class Post(HTTPMethodView):
                 post_id=post_id,
             )
         )
-        response = await DeletePostPresenter.process()
+        response = await DeletePostPresenter.transform()
         return json(body=response)
 
 
@@ -98,7 +98,7 @@ class PostList(HTTPMethodView):
                 user_id=request['user_id'],
             )
         )
-        response = await FeedViewPostPresenter.process(data=posts)
+        response = await FeedViewPostPresenter.transform(data=posts)
         return json(body=response)
 
     async def post(self, request: Request) -> Union[json, NoReturn]:
@@ -114,7 +114,7 @@ class PostList(HTTPMethodView):
                 user_id=request['user_id'],
             )
         )
-        response = await CreatePostPresenter.process(data=post)
+        response = await CreatePostPresenter.transform(data=post)
         return json(body=response)
 
 
@@ -132,7 +132,7 @@ class LikePost(HTTPMethodView):
                 post_id=post_id,
             )
         )
-        response = await LikePostPresenter.process()
+        response = await LikePostPresenter.transform()
         return json(body=response)
 
 
@@ -150,7 +150,7 @@ class UnLikePost(HTTPMethodView):
                 post_id=post_id,
             )
         )
-        response = await UnLikePostPresenter.process()
+        response = await UnLikePostPresenter.transform()
         return json(body=response)
 
 
@@ -175,7 +175,7 @@ class Comment(HTTPMethodView):
                 user_id=request['user_id'],
             ),
         )
-        response = await CreateCommentPresenter.process(data=comment)
+        response = await CreateCommentPresenter.transform(data=comment)
         return json(body=response)
 
     async def delete(
@@ -195,7 +195,7 @@ class Comment(HTTPMethodView):
         await DeleteCommentUsecase().execute(
             dto=DeleteCommentDto(**validator, user_id=request['user_id']),
         )
-        response = await DeleteCommentPresenter.process()
+        response = await DeleteCommentPresenter.transform()
         return json(body=response)
 
 
@@ -223,7 +223,7 @@ class SearchTag(HTTPMethodView):
         posts = await SearchTagUsecase().execute(
             dto=SearchTagDto(**validator, user_id=request['user_id']),
         )
-        response = await SearchTagPresenter.process(data=posts)
+        response = await SearchTagPresenter.transform(data=posts)
         return json(body=response)
 
 
@@ -250,5 +250,5 @@ class GetPostLikedUsers(HTTPMethodView):
                 post_id=post_id,
             ),
         )
-        response = await GetPostLikedUsersPresenter.process(data=users)
+        response = await GetPostLikedUsersPresenter.transform(data=users)
         return json(body=response)
