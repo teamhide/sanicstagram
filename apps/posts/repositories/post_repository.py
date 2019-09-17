@@ -286,8 +286,7 @@ class PostPSQLRepository(PostRepository):
         comment_id: int,
         user_id: int,
     ) -> Optional[NoReturn]:
-        comment = session.query(Comment) \
-            .filter(
+        comment = session.query(Comment).filter(
             Comment.id == comment_id,
             Comment.user_id == user_id,
         ).first()
@@ -314,8 +313,9 @@ class PostPSQLRepository(PostRepository):
             raise DeleteRowException
 
     def unlike_post(self, post_id: int, user_id: int) -> Optional[NoReturn]:
-        like = session.query(PostLike)\
-            .filter(post_id=post_id, user_id=user_id).first()
+        like = session.query(PostLike).filter(
+            post_id=post_id, user_id=user_id,
+        ).first()
         try:
             session.delete(like)
             session.commit()
