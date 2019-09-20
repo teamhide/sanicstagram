@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Union
+from apps.users.entities import UserEntity
 
 
 @dataclass
@@ -43,3 +44,11 @@ class PostEntity:
     like_count: int = None
     created_at: datetime = None
     updated_at: datetime = None
+
+
+@dataclass
+class PostLikeEntity:
+    id: int = None
+    post_id: int = None
+    user_id: int = None
+    user: UserEntity = None

@@ -1,44 +1,46 @@
+from datetime import datetime
+
 import pytest
 
-from tests import current_time
-from apps.posts.entities import (PostEntity, CommentEntity, TagEntity, ImageEntity)
+from apps.posts.entities import (PostEntity, CommentEntity, TagEntity,
+                                 ImageEntity, PostLikeEntity)
 from apps.users.entities import UserEntity
 
 
 @pytest.fixture
-def image_entity(current_time):
+def image_entity():
     return ImageEntity(
         id=1,
         path='1.jpg',
-        created_at=current_time,
-        updated_at=current_time,
+        created_at=datetime.utcnow().replace(microsecond=0),
+        updated_at=datetime.utcnow().replace(microsecond=0),
     )
 
 
 @pytest.fixture
-def tag_entity(current_time):
+def tag_entity():
     return TagEntity(
         id=1,
         name='hash',
-        created_at=current_time,
-        updated_at=current_time,
+        created_at=datetime.utcnow().replace(microsecond=0),
+        updated_at=datetime.utcnow().replace(microsecond=0),
     )
 
 
 @pytest.fixture
-def comment_entity(tag_entity, current_time):
+def comment_entity():
     return CommentEntity(
         id=1,
         body='comment',
         creator=1,
         tags=[tag_entity],
-        created_at=current_time,
-        updated_at=current_time,
+        created_at=datetime.utcnow().replace(microsecond=0),
+        updated_at=datetime.utcnow().replace(microsecond=0),
     )
 
 
 @pytest.fixture
-def user_entity(current_time):
+def user_entity():
     return UserEntity(
         id=1,
         nickname='hide',
@@ -51,13 +53,13 @@ def user_entity(current_time):
         followings=[],
         follower_count=10,
         following_count=20,
-        created_at=current_time,
-        updated_at=current_time,
+        created_at=datetime.utcnow().replace(microsecond=0),
+        updated_at=datetime.utcnow().replace(microsecond=0),
     )
 
 
 @pytest.fixture
-def post_entity(user_entity, comment_entity, current_time):
+def post_entity():
     return PostEntity(
         id=1,
         attachments=[],
@@ -68,6 +70,16 @@ def post_entity(user_entity, comment_entity, current_time):
         comments=[comment_entity],
         is_liked=True,
         like_count=20,
-        created_at=current_time,
-        updated_at=current_time,
+        created_at=datetime.utcnow().replace(microsecond=0),
+        updated_at=datetime.utcnow().replace(microsecond=0),
+    )
+
+
+@pytest.fixture
+def post_like_entity():
+    return PostLikeEntity(
+        id=1,
+        post_id=1,
+        user_id=2,
+        user=user_entity,
     )

@@ -3,7 +3,7 @@ from typing import Optional, List, Union, NoReturn
 
 import sqlalchemy.exc
 
-from apps.posts.entities import PostEntity, CommentEntity
+from apps.posts.entities import PostEntity, CommentEntity, PostLikeEntity
 from apps.posts.enum import DefaultPaging
 from apps.posts.models import Post, PostLike, Tag, Attachment, Comment
 from apps.users.entities import UserEntity
@@ -34,7 +34,7 @@ class PostRepository:
         pass
 
     @abc.abstractmethod
-    def get_like(self, post_id: int, user_id: int) -> Optional[PostLike]:
+    def get_like(self, post_id: int, user_id: int) -> Optional[PostLikeEntity]:
         pass
 
     @abc.abstractmethod
@@ -162,10 +162,28 @@ class PostPSQLRepository(PostRepository):
             for post in posts
         ]
 
-    def get_like(self, post_id: int, user_id: int) -> Optional[PostLike]:
-        return session.query(PostLike)\
+    def get_like(self, post_id: int, user_id: int) -> Optional[PostLikeEntity]:
+        like = session.query(PostLike)\
             .filter(PostLike.post_id == post_id, Post.user_id == user_id)\
             .first()
+        return PostLikeEntity(
+            id=like.id,
+            post_id=like.post_id,
+            user_id=like.user_id,
+            user=UserEntity(
+                id=like.user.id,
+                nickname=like.user.nickname,
+                profile_image=like.user.profile_image,
+                website=like.user.website,
+                bio=like.user.bio,
+                phone=like.user.phone,
+                gender=like.user.gender,
+                follower_count=like.user.follower_count,
+                following_count=like.user.following_count,
+                created_at=like.user.created_at,
+                updated_at=like.user.updated_at
+            )
+        )
 
     def get_post_liked_users(
         self,
