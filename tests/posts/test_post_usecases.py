@@ -22,45 +22,57 @@ def test_get_post_detail_usecase(post_entity, post_like_entity):
     assert isinstance(post_entity, PostEntity) == True
 
 
-def test_feed_view_post_usecase():
-    pass
+def test_feed_view_post_usecase(post_entity):
+    repository = Mock()
+    repository.get_post_list.return_value = [post_entity]
+
+    post_entities = repository.get_post_list()
+    assert type(post_entities) == list
+    for entity in post_entities:
+        assert isinstance(entity, PostEntity)
 
 
-def test_create_post_usecase():
-    pass
+def test_create_post_usecase(post_entity):
+    repository = Mock()
+    repository.save_post.return_value = post_entity
+
+    post_entity = PostEntity(
+        caption='caption',
+        user_id=1,
+    )
 
 
 def test_like_post_usecase():
-    pass
+    repository = Mock()
 
 
 def test_unlike_post_usecase():
-    pass
+    repository = Mock()
 
 
 def test_create_comment_usecase():
-    pass
+    repository = Mock()
 
 
 def test_delete_comment_usecase():
-    pass
+    repository = Mock()
 
 
 def test_search_post_usecase():
-    pass
+    repository = Mock()
 
 
 def test_get_post_liked_users_usecase():
-    pass
+    repository = Mock()
 
 
 def test_search_tag_usecase():
-    pass
+    repository = Mock()
 
 
 def test_delete_post_usecase():
-    pass
+    repository = Mock()
 
 
 def test_update_post_usecase():
-    pass
+    repository = Mock()
